@@ -26,7 +26,7 @@ jobs:
           cli: latest
 
       - name: Build bot
-        run: clojure -X:uberjar :jar Doplarr.jar
+        run: clojure -X:uberjar :jar Doplarr.jar :aot true :main-class doplarr.core
         shell: bash
 
       - name: Release
