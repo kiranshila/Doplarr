@@ -16,19 +16,26 @@
 
 ;; Slash command setup
 (def request-command
-  {:name "request",
-   :description "Requests a series or movie",
+  {:name "request"
+   :description "Requests a series or movie"
+   :default-permission false
    :options
-   [{:type 1,
-     :name "series",
-     :description "Requests a series",
+   [{:type 1
+     :name "series"
+     :description "Requests a series"
      :options
-     [{:type 3, :name "term", :description "Search term", :required true}]}
-    {:type 1,
-     :name "movie",
+     [{:type 3
+       :name "term"
+       :description "Search term"
+       :required true}]}
+    {:type 1
+     :name "movie"
      :description "Requests a movie",
      :options
-     [{:type 3, :name "term", :description "Search term", :required true}]}]})
+     [{:type 3
+       :name "term"
+       :description "Search term"
+       :required true}]}]})
 
 ;; Discljord setup
 (defn register-commands [guild-id]
