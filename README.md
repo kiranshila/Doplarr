@@ -5,7 +5,7 @@
 ### Building
 
 1. Clone directory
-2. `clojure -X:uberjar :jar Doplarr.jar`
+2. `clojure -X:uberjar :jar Doplarr.jar :aot true :main-class doplarr.core`
 
 ### Configuring
 

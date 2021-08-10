@@ -5,11 +5,12 @@
 
 (def endpoint (str (:url (:sonarr env)) "/api"))
 
-(def default-options {:profileId 1
-                      :monitored true
-                      :seasonFolder true
-                      :rootFolderPath (rootfolder endpoint (:api-key (:sonarr env)))
-                      :addOptions {:searchForMissingEpisodes true}})
+(defn default-options []
+  {:profileId 1
+   :monitored true
+   :seasonFolder true
+   :rootFolderPath (rootfolder endpoint (:api-key (:sonarr env)))
+   :addOptions {:searchForMissingEpisodes true}})
 
 (defn search [search-term]
   (:body (http-request
@@ -41,7 +42,7 @@
    :post
    (str endpoint "/series")
    (:api-key (:sonarr env))
-   {:form-params (merge series default-options)
+   {:form-params (merge series (default-options))
     :content-type :json}))
 
 (defn request-season [series season]
@@ -53,7 +54,7 @@
                                 :monitored (= ssn season)})
                              (into [])
                              (assoc series :seasons))
-                        default-options))]
+                        (default-options)))]
     (http-request
      (if started? :put :post)
      (str endpoint "/series")
@@ -68,5 +69,5 @@
    (:api-key (:sonarr env))
    {:form-params (merge
                   (assoc-in series [:seasons 0 :monitored] true)
-                  default-options)
+                  (default-options))
     :content-type :json}))

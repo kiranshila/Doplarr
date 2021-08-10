@@ -6,10 +6,6 @@
       %msg%n</Pattern>
     </layout>
   </appender>
-  <logger name="discljord.connections" level="error"
-  additivity="false">
-    <appender-ref ref="CONSOLE" />
-  </logger>
   <root level="error">
     <appender-ref ref="CONSOLE" />
   </root>
