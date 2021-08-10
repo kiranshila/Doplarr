@@ -1,0 +1,7 @@
+{:sonarr {:url "http://localhost:8989"
+          :api-key "your-key"}
+ :radarr {:url "http://localhost:7878"
+          :api-key "your-key"}
+ :bot    {:max-results 10
+          :cache-expiration 60000
+          :token "your-key"}}
