@@ -26,10 +26,10 @@ jobs:
           cli: latest
 
       - name: Build bot
-        run: clojure -X:uberjar :jar Doplarr.jar :aot true :main-class doplarr.core
+        run: clj -T:build uberjar
         shell: bash
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          file: Doplarr.jar
+          file: target/Doplarr.jar
