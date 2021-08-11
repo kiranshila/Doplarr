@@ -1,11 +1,6 @@
-name: Build jar
+name: Main
 
-on:
-  push:
-    branches:
-      - "!*"
-    tags:
-      - "v*"
+on: push
 
 env:
   REGISTRY: ghcr.io
@@ -38,6 +33,7 @@ jobs:
 
       - name: Publish Github Release
         uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: target/Doplarr.jar
 
