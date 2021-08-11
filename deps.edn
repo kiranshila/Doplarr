@@ -9,6 +9,8 @@
         cheshire/cheshire {:mvn/version "5.10.1"}
         hato/hato {:mvn/version "0.8.2"}}
 
+ :jvm-opts ["-Dconfig=config.edn"]
+
  :aliases {:build {:extra-paths ["build"]
                    :deps {io.github.clojure/tools.build {:git/tag "v0.1.6" :git/sha "5636e61"}
                           com.github.seancorfield/depstar {:mvn/version "2.1.278"}}

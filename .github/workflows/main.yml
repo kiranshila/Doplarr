@@ -32,4 +32,4 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          file: target/Doplarr.jar
+          files: target/Doplarr.jar
