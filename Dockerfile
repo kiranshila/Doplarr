@@ -1,6 +1,4 @@
-FROM clojure:openjdk-11-tools-deps
+FROM adoptopenjdk/openjdk11:alpine-jre
 MAINTAINER Kiran Shila <me@kiranshila.com>
-COPY . /usr/src/doplarr
-WORKDIR /usr/src/doplarr
-RUN clojure -T:build uberjar
-CMD ["java","-jar","Doplarr.jar"]
+COPY target/Doplarr.jar /home/Doplarr.jar
+CMD ["java","-jar","/home/Doplarr.jar"]
