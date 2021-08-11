@@ -2,7 +2,13 @@
 
 > A _Better_ Sonarr/Radarr Request Bot for Discord
 
-### Building
+## Running with Docker
+
+Pull the latest image with `docker pull ghcr.io/kiranshila/doplarr:main`
+
+Then run with `fixme`
+
+## Building and Running Locally
 
 You need the Clojure CLI tools to build
 
@@ -11,7 +17,7 @@ You need the Clojure CLI tools to build
 
 ### Configuring
 
-1. Fill out `resources/config.edn` with the requisite things
+1. Fill out `config.edn` with the requisite things
 
 ### Setting up as a service (On Linux (Systemd))
 
