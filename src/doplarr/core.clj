@@ -182,7 +182,7 @@
                            :movie :monitored)
           results (->> (perform-search request-term)
                        (filter (complement filter-aquired))
-                       (take (:max-results (:bot env)))
+                       (take (:max-results env))
                        (into []))]
       ; Update the cache with these results
       (swap! cache assoc-in [uuid :results] results)
