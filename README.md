@@ -1,7 +1,16 @@
-# Doplarr
-> A _Better_ Sonarr/Radarr Request Bot for Discord
-> [![Logo](https://raw.githubusercontent.com/kiranshila/Doplarr/main/logos/doplarr_logo_lettered.png)]
+<p align="center">
+  <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/logos/logo_cropped.png" width="200" height="200">
+</p>
 
+</p>
+<p align="center">
+<img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/kiranshila/doplarr/Main?style=for-the-badge">
+<img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/kiranshila/doplarr?style=for-the-badge">
+<img alt="Code" src="https://img.shields.io/badge/code-data-blueviolet?style=for-the-badge">
+</p>
+
+
+> A _Better_ Sonarr/Radarr Request Bot for Discord
 ## Running with Docker
 
 Simply run with
