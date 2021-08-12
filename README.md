@@ -6,7 +6,18 @@
 
 Pull the latest image with `docker pull ghcr.io/kiranshila/doplarr:main`
 
-Then run with `fixme`
+Then run with
+```bash
+docker run \
+-e SONARR_URL='http://localhost:8989' \
+-e RADARR_URL='http://localhost:7878' \
+-e SONARR_API='sonarr_api' \
+-e RADARR_API='radarr_api' \
+-e MAX_RESULTS=10 \
+-e BOT_TOKEN='bot_token' \
+--name doplarr ghcr.io/kiranshila/doplarr:main
+
+```
 
 ## Building and Running Locally
 
