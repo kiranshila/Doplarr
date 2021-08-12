@@ -1,6 +1,6 @@
 # Doplarr
-
 > A _Better_ Sonarr/Radarr Request Bot for Discord
+> [![Logo](https://raw.githubusercontent.com/kiranshila/Doplarr/main/logos/doplarr_logo_lettered.png)]
 
 ## Running with Docker
 
