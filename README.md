@@ -77,11 +77,23 @@ You need the Clojure CLI tools to build
 1. Clone directory
 2. `clj -T:build uberjar`
 
-### Configuring
+To skip the build, just download `Doplarr.jar` and `config.edn` from the releases
+
+## Configuring
 
 1. Fill out `config.edn` with the requisite things
 
-### Setting up as a service (On Linux (Systemd))
+### Setting up on Windows
+
+1. Make a folder called Doplarr that contains the jar, the config file, and the
+   following batch file (something like `run.bat`)
+
+```batchfile
+@ECHO OFF
+start java -jar Doplarr.jar -Dconfig=config.edn
+```
+
+### Setting up on Linux (as a systemd service)
 
 1. Create the file /etc/systemd/system/doplarr.service with the following
 
