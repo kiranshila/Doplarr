@@ -14,7 +14,7 @@
 
 ## Why not [Requestrr](https://github.com/darkalfx/requestrr)
 * Uses modern Discord slash commands and components, which provies a clean, performant UI on desktop and mobile
-* Simple codebase, <1k lines of code versus almost 10k lines of C#
+* Simple codebase, <1k lines of code versus almost 10k lines of C# and 7k lines of JS
 * Simple configuration, no need to have a web configuration
 * Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly better language 😛
 ## Setup
