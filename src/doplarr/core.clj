@@ -12,7 +12,7 @@
   (:gen-class))
 
 (defonce state (atom nil))
-(defonce cache (cache/ttl-cache-factory {} :ttl (:cache-expiration (:bot env))))
+(defonce cache (cache/ttl-cache-factory {} :ttl 900000)) ; 15 Minute cache expiration, coinciding with the interaction token
 
 ;; Slash command setup
 (def request-command
@@ -253,8 +253,8 @@
 ;; Bot startup and entry point
 (defn run []
   (let [event-ch (a/chan 100)
-        connection-ch (c/connect-bot! (:token (:bot env))  event-ch :intents #{:guilds})
-        messaging-ch (m/start-connection! (:token (:bot env)))
+        connection-ch (c/connect-bot! (:bot-token env)  event-ch :intents #{:guilds})
+        messaging-ch (m/start-connection! (:bot-token env))
         init-state {:connection connection-ch
                     :event event-ch
                     :messaging messaging-ch}]

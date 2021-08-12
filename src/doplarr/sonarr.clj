@@ -3,20 +3,20 @@
    [config.core :refer [env]]
    [doplarr.arr-utils :refer [http-request rootfolder]]))
 
-(def endpoint (str (:url (:sonarr env)) "/api"))
+(def endpoint (str (:sonarr-url env) "/api"))
 
 (defn default-options []
   {:profileId 1
    :monitored true
    :seasonFolder true
-   :rootFolderPath (rootfolder endpoint (:api-key (:sonarr env)))
+   :rootFolderPath (rootfolder endpoint (:sonarr-api env))
    :addOptions {:searchForMissingEpisodes true}})
 
 (defn search [search-term]
   (:body (http-request
           :get
           (str endpoint "/series/lookup")
-          (:api-key (:sonarr env))
+          (:sonarr-api env)
           {:query-params {:term search-term}})))
 
 (defn started-aquisition? [series]
@@ -41,7 +41,7 @@
   (http-request
    :post
    (str endpoint "/series")
-   (:api-key (:sonarr env))
+   (:sonarr-api env)
    {:form-params (merge series (default-options))
     :content-type :json}))
 
@@ -58,7 +58,7 @@
     (http-request
      (if started? :put :post)
      (str endpoint "/series")
-     (:api-key (:sonarr env))
+     (:sonarr-api env)
      {:form-params series
       :content-type :json})))
 
@@ -66,7 +66,7 @@
   (http-request
    :post
    (str endpoint "/series")
-   (:api-key (:sonarr env))
+   (:sonarr-api env)
    {:form-params (merge
                   (assoc-in series [:seasons 0 :monitored] true)
                   (default-options))
