@@ -1,7 +1,5 @@
-# Doplarr
+# <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/logos/logo_cropped.png" width="200" height="200">
 > A _Better_ Sonarr/Radarr Request Bot for Discord
-> [![Logo](https://raw.githubusercontent.com/kiranshila/Doplarr/main/logos/logo_cropped.png)]
-
 ## Running with Docker
 
 Simply run with
