@@ -41,7 +41,7 @@ User=root
 Group=root
 Type=simple
 WorkingDirectory=/opt/Doplarr
-ExecStart=/usr/bin/java -jar
+ExecStart=/usr/bin/java -jar target/Doplarr.jar -Dconfig=config.edn
 TimeoutStopSec=20
 KillMode=process
 Restart=always
