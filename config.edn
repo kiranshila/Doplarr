@@ -1,6 +1,7 @@
 {:sonarr-url "http://localhost:8989"
- :sonarr-api "your-key"
+ :sonarr-api "sonarr_api_kei"
  :radarr-url "http://localhost:7878"
- :radarr-api "your-key"
+ :radarr-api "radarr_api_kei"
  :max-results 10
- :bot-token "your-token"}
+ :bot-token "bot_token"
+ :role-id "role_id"}

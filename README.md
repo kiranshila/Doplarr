@@ -12,10 +12,11 @@
 > A _Better_ Sonarr/Radarr Request Bot for Discord
 
 ## Why not [Requestrr](https://github.com/darkalfx/requestrr)
-* Uses modern Discord slash commands and components, which provies a clean, performant UI on desktop and mobile
-* Simple codebase, <1k lines of code versus almost 10k lines of C# and 7k lines of JS
-* Simple configuration, no need to have a whole web frontend
-* Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly better language 😛
+
+- Uses modern Discord slash commands and components, which provies a clean, performant UI on desktop and mobile
+- Simple codebase, <1k lines of code versus almost 10k lines of C# and 7k lines of JS
+- Simple configuration, no need to have a whole web frontend
+- Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly better language 😛
 
 ### Screenshots
 
@@ -24,18 +25,31 @@
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/button.png" width="400">
 
 ## Setup
+
 ### Discord
+
 1. Create a new [Application](https://discord.com/developers/applications) in Discord
 2. Go to the Bot tab and add a new bot
 3. Copy out the token
 4. Go to OAuth2 and under "OAuth2 URL Generator", enable `applications.commands` and `bot`
 5. Copy the resulting URL and use as the invite link to your server
+
+In the server for which you will use the bot, you need to create a new role for
+your users. Then, grab that role id.
+
+To do this:
+
+1. Enable Developer Mode (User Settings -> Advanced -> Developer Mode)
+2. Under your server settings, go to Roles, find the role and "Copy ID"
+
 ### Sonarr/Radarr
+
 1. Copy out your API keys from Settings -> General
 
 ## Running with Docker
 
 Simply run with
+
 ```bash
 docker run \
 -e SONARR_URL='http://localhost:8989' \
@@ -44,6 +58,7 @@ docker run \
 -e RADARR_API='radarr_api' \
 -e MAX_RESULTS=10 \
 -e BOT_TOKEN='bot_token' \
+-e ROLE_ID='role_id' \
 --name doplarr ghcr.io/kiranshila/doplarr:main
 
 ```

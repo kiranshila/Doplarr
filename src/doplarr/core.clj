@@ -18,7 +18,7 @@
 (def request-command
   {:name "request"
    :description "Requests a series or movie"
-   :default-permission false
+   :default_permission false
    :options
    [{:type 1
      :name "series"
@@ -44,6 +44,16 @@
    (:id @state)
    guild-id
    [request-command]))
+
+(defn set-permission [guild-id command-id]
+  (m/edit-application-command-permissions!
+   (:messaging @state)
+   (:id @state)
+   guild-id
+   command-id
+   [{:id (:role-id env)
+     :type 1
+     :permission true}]))
 
 (defn interaction-response [interaction-id interaction-token type & {:keys [ephemeral? content components embeds]}]
   (m/create-interaction-response!
@@ -245,7 +255,9 @@
 
 (defmethod handle-event :guild-create
   [event-type {:keys [id]}]
-  (register-commands id))
+  (let [guild-id id
+        [{command-id :id}] @(register-commands guild-id)]
+    (set-permission guild-id command-id)))
 
 (defmethod handle-event :default
   [event-type event-data])
