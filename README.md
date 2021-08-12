@@ -23,6 +23,12 @@
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Selection.png" width="400">
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/button.png" width="400">
 
+### Shortcomings
+I wanted a clean app for the sole purpose of requsting movies/TV shows.
+I personally didn't need Siri, Overseerr, or Ombi integration - so those are missing in this bot.
+If enough people would like to see those features, please request it.
+As such, there is only a boolean permission (role gated) for who has access to the bot, nothing fancy.
+
 ## Setup
 ### Discord
 1. Create a new [Application](https://discord.com/developers/applications) in Discord
