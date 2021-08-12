@@ -4,9 +4,7 @@
 
 ## Running with Docker
 
-Pull the latest image with `docker pull ghcr.io/kiranshila/doplarr:main`
-
-Then run with
+Simply run with
 ```bash
 docker run \
 -e SONARR_URL='http://localhost:8989' \
