@@ -26,7 +26,7 @@
 
 ### Shortcomings
 
-I wanted a clean app for the sole purpose of requsting movies/TV shows.
+I wanted a clean app for the sole purpose of requesting movies/TV shows.
 I personally didn't need Siri, Overseerr, or Ombi integration - so those are missing in this bot.
 If enough people would like to see those features, please request it.
 As such, there is only a boolean permission (role gated) for who has access to the bot, nothing fancy.
