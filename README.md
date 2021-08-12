@@ -11,6 +11,22 @@
 
 
 > A _Better_ Sonarr/Radarr Request Bot for Discord
+
+## Why not [Requestrr](https://github.com/darkalfx/requestrr)
+* Uses modern Discord slash commands and components, which provies a clean, performant UI on desktop and mobile
+* Simple codebase, <1k lines of code versus almost 10k lines of C#
+* Simple configuration, no need to have a web configuration
+* Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly better language 😛
+## Setup
+### Discord
+1. Create a new [Application](https://discord.com/developers/applications) in Discord
+2. Go to the Bot tab and add a new bot
+3. Copy out the token
+4. Go to OAuth2 and under "OAuth2 URL Generator", enable `applications.commands`
+5. Copy the resulting URL and use as the invite link to your server
+### Sonarr/Radarr
+1. Copy out your API keys from Settings -> General
+
 ## Running with Docker
 
 Simply run with
