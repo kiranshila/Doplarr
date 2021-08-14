@@ -11,25 +11,26 @@
 
 > A _Better_ Sonarr/Radarr Request Bot for Discord
 
-## Why not [Requestrr](https://github.com/darkalfx/requestrr)
+## Why does this exist
 
 - Uses modern Discord slash commands and components, which provides a clean, performant UI on desktop and mobile
-- Simple codebase, <1k lines of code versus almost 10k lines of C# and 7k lines of JS
+- Simple codebase, <1k lines of code which *should* make it easy to maintain
 - Simple configuration, no need to have a whole web frontend
-- Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly better language 😛
+- Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly good language 😛
+
+### Caveats
+
+I wanted a clean app for the sole purpose of requesting movies/TV shows.
+I personally didn't need Siri, Overseerr, or Ombi integration - so those are missing in this bot (for now).
+There is only a boolean permission (role gated) for who has access to the bot, nothing fancy.
+
+If any of these don't suit your fancy, check out [Requestrr](https://github.com/darkalfx/requestrr)
 
 ### Screenshots
 
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Request.png" width="400">
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Selection.png" width="400">
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/button.png" width="400">
-
-### Shortcomings
-
-I wanted a clean app for the sole purpose of requesting movies/TV shows.
-I personally didn't need Siri, Overseerr, or Ombi integration - so those are missing in this bot.
-If enough people would like to see those features, please request it.
-As such, there is only a boolean permission (role gated) for who has access to the bot, nothing fancy.
 
 ## Setup
 
