@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11:alpine-jre
+FROM clojure:openjdk-11-tools-deps
 MAINTAINER Kiran Shila <me@kiranshila.com>
-COPY target/Doplarr.jar /home/Doplarr.jar
-CMD ["java","-jar","/home/Doplarr.jar"]
+COPY . /home/Doplarr
+CMD ["java","-jar","/home/Doplarr/target/Doplarr.jar"]
