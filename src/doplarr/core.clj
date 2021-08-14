@@ -171,6 +171,10 @@
                                :options (conj (map #(hash-map :label (str "Season: " %) :value %) (sonarr/missing-seasons series))
                                               {:label "All Seasons" :value "-1"})}]}]})
 
+(defn max-results []
+  (or (:max-results env)
+      10))
+
 (defn start-request [interaction]
   (let [uuid (str (java.util.UUID/randomUUID))
         id (:id interaction)
@@ -192,7 +196,7 @@
                            :movie :monitored)
           results (->> (perform-search request-term)
                        (filter (complement filter-aquired))
-                       (take (:max-results env))
+                       (take (max-results))
                        (into []))]
       ; Update the cache with these results
       (swap! cache assoc-in [uuid :results] results)

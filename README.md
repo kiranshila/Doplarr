@@ -63,7 +63,6 @@ docker run \
 -e RADARR_URL='http://localhost:7878' \
 -e SONARR_API='sonarr_api' \
 -e RADARR_API='radarr_api' \
--e MAX_RESULTS=10 \
 -e BOT_TOKEN='bot_token' \
 -e ROLE_ID='role_id' \
 --name doplarr ghcr.io/kiranshila/doplarr:main
@@ -83,9 +82,18 @@ To skip the build, just download `Doplarr.jar` and `config.edn` from the release
 
 1. Fill out `config.edn` with the requisite things
 
-You can optionally provide `:radarr-profile-id` and `:sonarr-profile-id` to
-specify which profile movies/series will be requested with - otherwise the
-lowest-valued profile ID is used.
+### Optional Settings
+
+By default, the profile for which requests will be made will be the
+lowest-indexed (first) in your list of profiles. For me, this is the default
+Any. You can change this by adding the config option `:radarr-profile-id` (or
+`RADARR_PROFILE_ID` if you are using environment variables (docker) instead of
+the config file) to the integer of the profile. This is however not exposed in the GUI for some reason,
+so you'll have to use the Radarr API tool to find it. I plan on making this
+nicer as this is creating some bugs.
+
+Also, I'm limiting the size of the results in the drop down to 10, this can be
+set with `:max-results` in the config file of `MAX_RESULTS` as an environment variable.
 
 ### Setting up on Windows
 
