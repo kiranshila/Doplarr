@@ -26,6 +26,8 @@ There is only a boolean permission (role gated) for who has access to the bot, n
 
 If any of these don't suit your fancy, check out [Requestrr](https://github.com/darkalfx/requestrr)
 
+Please consider this software "beta enough" as some of the error handling is pretty rough around the edges - however I've been using this for a bit now on my own server without any issues, but of course your mileage may vary.
+
 ### Screenshots
 
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Request.png" width="400">
