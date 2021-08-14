@@ -289,7 +289,6 @@
                  :sonarr-api
                  :radarr-url
                  :radarr-api
-                 :max-results
                  :bot-token
                  :role-id]]
     (doseq [entry entries]
