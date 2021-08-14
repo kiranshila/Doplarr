@@ -26,14 +26,17 @@
            first
            :id)))
 
+(defn default-options []
+  {:qualityProfileId (determine-quality-profile)
+   :monitored true
+   :minimumAvailability "announced"
+   :rootFolderPath (rootfolder (endpoint) (:radarr-api env))
+   :addOptions {:searchForMovie true}})
+
 (defn request [movie]
   (http-request
    :post
    (str (endpoint) "/movie")
    (:radarr-api env)
-   {:form-params (merge movie {:qualityProfileId (determine-quality-profile)
-                               :monitored true
-                               :minimumAvailability "announced"
-                               :rootFolderPath (rootfolder (endpoint) (:radarr-api env))
-                               :addOptions {:searchForMovie true}})
+   {:form-params (merge movie (default-options))
     :content-type :json}))
