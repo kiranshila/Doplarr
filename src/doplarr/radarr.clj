@@ -12,6 +12,12 @@
           (:radarr-api env)
           {:query-params {:term search-term}})))
 
+(defn quality-profiles []
+  (http-request
+   :get
+   (:str endpoint "qualityProfile")
+   (:radarr-api env)))
+
 (defn request [movie]
   (http-request
    :post
