@@ -83,6 +83,10 @@ To skip the build, just download `Doplarr.jar` and `config.edn` from the release
 
 1. Fill out `config.edn` with the requisite things
 
+You can optionally provide `:radarr-profile-id` and `:sonarr-profile-id` to
+specify which profile movies/series will be requested with - otherwise the
+lowest-valued profile ID is used.
+
 ### Setting up on Windows
 
 1. Make a folder called Doplarr that contains the jar, the config file, and the

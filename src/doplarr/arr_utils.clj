@@ -15,3 +15,7 @@
        :body
        first
        :path))
+
+(defn quality-profile-data [profile]
+  {:name (:name profile)
+   :id (:id profile)})
