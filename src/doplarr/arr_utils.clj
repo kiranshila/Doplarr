@@ -1,25 +1,36 @@
 (ns doplarr.arr-utils
   (:require
-   [config.core :refer [env]]
+   [clojure.tools.logging :as log]
+   [clojure.core.async :as a]
    [hato.client :as hc]))
 
-(defn http-request [method url key & params]
-  (let [response (hc/request
-                  (apply merge
-                         {:method method
-                          :url url
-                          :as :json
-                          :headers {"X-API-Key" key}}
-                         params))]
-    (when (:debug env)
-      (clojure.pprint/pprint response))
-    response))
+(defn http-request [method url key & [params]]
+  (let [chan (a/chan)]
+    (hc/request
+     (merge
+      {:method method
+       :url url
+       :as :json
+       :async? true
+       :headers {"X-API-Key" key}}
+      params)
+     #(do
+        (a/put! chan %)
+        (a/close! chan))
+     #(log/error % (ex-data %)))
+    chan))
 
 (defn rootfolder [base-url key]
-  (->> (http-request :get (str base-url "/rootfolder") key)
-       :body
-       first
-       :path))
+  (let [chan (a/promise-chan)]
+    (a/pipeline
+     1
+     chan
+     (map (comp :path first :body))
+     (http-request
+      :get
+      (str base-url "/rootfolder")
+      key))
+    chan))
 
 (defn quality-profile-data [profile]
   {:name (:name profile)

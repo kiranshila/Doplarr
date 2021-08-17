@@ -1,5 +1,6 @@
 (ns doplarr.core
   (:require
+   [com.rpl.specter :as s]
    [doplarr.sonarr :as sonarr]
    [doplarr.radarr :as radarr]
    [discljord.messaging :as m]
@@ -13,6 +14,8 @@
 
 (defonce state (atom nil))
 (defonce cache (cache/ttl-cache-factory {} :ttl 900000)) ; 15 Minute cache expiration, coinciding with the interaction token
+
+(def channel-timeout 600000)
 
 ;; Slash command setup
 (def request-command
@@ -36,6 +39,31 @@
        :name "term"
        :description "Search term"
        :required true}]}]})
+
+(def max-results (delay (:max-results env 10)))
+
+(def search-fn {:series sonarr/search
+                :movie radarr/search})
+
+(def profiles-fn {:series sonarr/quality-profiles
+                  :movie radarr/quality-profiles})
+
+(def request-fn {:series sonarr/request
+                 :movie radarr/request})
+
+(def timed-out-response {:content "Request timed out, please try again"})
+
+(def interaction-types {1 :ping
+                        2 :application-command
+                        3 :message-component})
+
+(def component-types {1 :action-row
+                      2 :button
+                      3 :select-menu})
+
+(def request-thumbnail
+  {:series "https://thetvdb.com/images/logo.png"
+   :movie "https://i.imgur.com/44ueTES.png"})
 
 ;; Discljord setup
 (defn register-commands [guild-id]
@@ -88,20 +116,6 @@
    :components components
    :embeds embeds))
 
-(defn delete-interaction-response [interaction-token]
-  (m/delete-original-interaction-response!
-   (:messaging @state)
-   (:id @state)
-   interaction-token))
-
-(def interaction-types {1 :ping
-                        2 :application-command
-                        3 :message-component})
-
-(def component-types {1 :action-row
-                      2 :button
-                      3 :select-menu})
-
 (defn application-command-interaction-option-data [app-com-int-opt]
   [(keyword (:name app-com-int-opt))
    (into {} (map (juxt (comp keyword :name) :value)) (:options app-com-int-opt))])
@@ -112,9 +126,9 @@
    :token (:token interaction)
    :payload
    {:component-type (component-types (get-in interaction [:data :component-type]))
-    :component-id (get-in interaction [:data :custom-id])
-    :name (get-in interaction [:data :name])
-    :values (get-in interaction [:data :values])
+    :component-id (s/select-one [:data :custom-id] interaction)
+    :name (s/select-one [:data :name] interaction)
+    :values (s/select-one [:data :values] interaction)
     :options (into {} (map application-command-interaction-option-data) (get-in interaction [:data :options]))}})
 
 (defn request-button [uuid enabled?]
@@ -124,124 +138,122 @@
    :custom_id (str "request:" uuid)
    :label "Request"})
 
-(defn generate-select-menu-option [index result]
+(defn select-menu-option [index result]
   {:label (:title result)
    :description (:year result)
    :value index})
 
-(defn generate-search-response [results uuid]
-  (if (empty? results)
-    {:content "Search result returned no hits"}
-    {:content "Choose one of the following results:"
-     :components [{:type 1
-                   :components [{:type 3
-                                 :custom_id (str "select:" uuid)
-                                 :options (into [] (map-indexed generate-select-menu-option results))}]}]}))
-
-(def request-thumbnail
-  {:series "https://thetvdb.com/images/logo.png"
-   :movie "https://i.imgur.com/44ueTES.png"})
-
-(defn selection-embed [selection request-type & {:keys [season]}]
-  (cond-> {:title (:title selection)
-           :description (:overview selection)
-           :image {:url (:remotePoster selection)}
-           :thumbnail {:url (request-thumbnail request-type)}}
-    season (assoc :fields [{:name "Season"
-                            :value (if (= season -1)
-                                     "All"
-                                     season)}])))
-
-(defn request [selection uuid & {:keys [season]}]
-  (let [request-type (get-in @cache [uuid :type])]
-    {:content (str "Request this " (name request-type) " ?")
-     :embeds [(selection-embed selection request-type :season season)]
-     :components [{:type 1 :components [(request-button uuid true)]}]}))
-
-(defn request-alert [selection uuid & {:keys [season]}]
-  (let [request-type (get-in @cache [uuid :type])]
-    {:content "This has been requested!"
-     :embeds [(selection-embed selection request-type :season season)]}))
-
-(defn select-season [series uuid]
-  {:content "Which season?"
+(defn dropdown [content id options]
+  {:content content
    :components [{:type 1
                  :components [{:type 3
-                               :custom_id (str "select_season:" uuid)
-                               :options (conj (map #(hash-map :label (str "Season: " %) :value %) (sonarr/missing-seasons series))
-                                              {:label "All Seasons" :value "-1"})}]}]})
+                               :custom_id id
+                               :options options}]}]})
 
-(defn max-results []
-  (or (:max-results env)
-      10))
+(defn search-response [results uuid]
+  (if (empty? results)
+    {:content "Search result returned no hits"}
+    (dropdown "Choose one of the following results"
+              (str "select:" uuid)
+              (map-indexed select-menu-option results))))
 
-(defn start-request [interaction]
+(defn selection-embed [selection & {:keys [season profile]}]
+  {:title (:title selection)
+   :description (:overview selection)
+   :image {:url (:remotePoster selection)}
+   :thumbnail {:url (request-thumbnail (if season :series :movie))}
+   :fields (filterv
+            identity
+            [{:name "Profile"
+              :value profile}
+             (when season
+               {:name "Season"
+                :value (if (= season -1)
+                         "All"
+                         season)})])})
+
+(defn request [selection uuid & {:keys [season profile]}]
+  {:content (str "Request this " (if season "series" "movie") " ?")
+   :embeds [(selection-embed selection :season season :profile profile)]
+   :components [{:type 1 :components [(request-button uuid true)]}]})
+
+(defn request-alert [selection & {:keys [season profile]}]
+  {:content "This has been requested!"
+   :embeds [(selection-embed selection :season season :profile profile)]})
+
+(defn select-season [series uuid]
+  (dropdown "Which season?"
+            (str "select_season:" uuid)
+            (conj (map #(hash-map :label (str "Season: " %) :value %)
+                       (range 1 (inc (:seasonCount series))))
+                  {:label "All Seasons" :value "-1"})))
+
+(defn select-profile [profiles uuid]
+  (dropdown "Which quality profile?"
+            (str "select_profile:" uuid)
+            (map #(hash-map :label (:name %) :value (:id %)) profiles)))
+
+(defn await-interaction [chan token]
+  (a/go
+    (a/alt!
+      (a/timeout channel-timeout) (do
+                                    (update-interaction-response token timed-out-response)
+                                    nil)
+      chan ([v] v))))
+
+(defn make-request [interaction]
   (let [uuid (str (java.util.UUID/randomUUID))
         id (:id interaction)
         token (:token interaction)
         search (:options (:payload interaction))
         request-type (first (keys search))
-        request-term (get-in search [request-type :term])]
-    ; Create the cache entry with the data we have so far
-    (swap! cache assoc-in [uuid :token] token)
-    (swap! cache assoc-in [uuid :type] request-type)
+        request-term (s/select-one [request-type :term] search)
+        chan (a/chan)]
     ; Send the in-progress response
     (interaction-response id token 5 :ephemeral? true)
-    ; Fetch the request
-    (let [perform-search (case request-type
-                           :series sonarr/search
-                           :movie radarr/search)
-          filter-aquired (case request-type
-                           :series sonarr/aquired-all-seasons?
-                           :movie :monitored)
-          results (->> (perform-search request-term)
-                       (filter (complement filter-aquired))
-                       (take (max-results))
-                       (into []))]
-      ; Update the cache with these results
-      (swap! cache assoc-in [uuid :results] results)
-      ; Generate the results selector and update the thing
-      (update-interaction-response token (generate-search-response results uuid)))))
-
-(defn component-ack [interaction-id interaction-token]
-  (interaction-response interaction-id interaction-token 6))
-
-(defn perform-request [uuid]
-  (let [selection (get-in @cache [uuid :selection])
-        season (get-in @cache [uuid :season])
-        type (get-in @cache [uuid :type])]
-    (case type
-      :movie (radarr/request selection)
-      :series (if (= -1 season)
-                (sonarr/request-all selection)
-                (sonarr/request-season selection season)))))
+    ; Create this command's channel
+    (swap! cache assoc uuid chan)
+    (a/go
+      (let [results (->> ((search-fn request-type) request-term)
+                         a/<!
+                         (into [] (take @max-results)))]
+        ; Results selection
+        (a/<! (update-interaction-response token (search-response results uuid)))
+        (when-some [selection-interaction (a/<! (await-interaction chan token))]
+          (let [selection-id (Integer/parseInt (s/select-one [:payload :values 0] selection-interaction))
+                profiles (->> ((profiles-fn request-type))
+                              a/<!
+                              (into []))]
+            ; Profile selection
+            (a/<! (update-interaction-response token (select-profile profiles uuid)))
+            (when-some [profile-interaction (a/<! (await-interaction chan token))]
+              (let [selection (nth results selection-id)
+                    profile-id (Integer/parseInt (s/select-one [:payload :values 0] profile-interaction))
+                    profile (s/select-one [s/ALL (comp (partial = profile-id) :id) :name] profiles)
+                    season-id (when (= request-type :series)
+                                ; Optional season selection for TV shows
+                                (a/<! (update-interaction-response token (select-season selection uuid)))
+                                (when-some [season-interaction (a/<! (await-interaction chan token))]
+                                  (Integer/parseInt (s/select-one [:payload :values 0] season-interaction))))]
+                ; Verify request
+                (a/<! (update-interaction-response token (request selection uuid :season season-id :profile profile)))
+                ; Wait for the button press, we don't care about the actual interaction
+                (a/<! (await-interaction chan token))
+                ; Send public followup and actually perform request
+                (a/<! (followup-repsonse token (request-alert selection :season season-id :profile profile)))
+                ((request-fn request-type)
+                 selection
+                 {:season season-id
+                  :profile-id profile-id})
+                (update-interaction-response token {:content "Requested!"
+                                                    :components []})))))))))
 
 (defn continue-request [interaction]
-  (let [[action uuid] (str/split (get-in interaction [:payload :component-id]) #":")
-        token (get-in @cache [uuid :token])
-        request-type (get-in @cache [uuid :type])]
-    (case action
-      "select" (let [selection-id (Integer/parseInt (get-in interaction [:payload :values 0]))
-                     selection (get-in @cache [uuid :results selection-id])]
-                 (swap! cache assoc-in [uuid :selection] selection)
-                 (case request-type
-                   :series (update-interaction-response token (select-season selection uuid))
-                   :movie (update-interaction-response token (request selection uuid))))
+  (let [[_ uuid] (str/split (s/select-one [:payload :component-id] interaction) #":")]
+    (interaction-response (:id interaction) (:token interaction) 6)
+    (a/offer! (get @cache uuid) interaction)))
 
-      "select_season" (let [selection (get-in @cache [uuid :selection])
-                            season-id (Integer/parseInt (get-in interaction [:payload :values 0]))]
-                        (swap! cache assoc-in [uuid :season] season-id)
-                        (update-interaction-response token (request selection uuid :season season-id)))
-      "request" (let [selection (get-in @cache [uuid :selection])
-                      season (get-in @cache [uuid :season])]
-                  (followup-repsonse token (request-alert selection uuid {:season season}))
-                  (perform-request uuid)
-                  (update-interaction-response token {:content "Requested!"
-                                                      :components []}))
-      "cancel" (delete-interaction-response (:token interaction)))
-    (component-ack (:id interaction) (:token interaction))))
-
-;; Gateway event handlers
+;;;;;;;;;;;;;;;;;;;;;;;; Gateway event handlers
 (defmulti handle-event
   (fn [event-type event-data]
     event-type))
@@ -250,7 +262,7 @@
   [_ data]
   (let [interaction (interaction-data data)]
     (case (:type interaction)
-      :application-command (start-request interaction) ; These will all be requests as that is the only top level command
+      :application-command (make-request interaction) ; These will all be requests as that is the only top level command
       :message-component (continue-request interaction))))
 
 (defmethod handle-event :ready

@@ -1,42 +1,54 @@
 (ns doplarr.radarr
   (:require
    [config.core :refer [env]]
-   [doplarr.arr-utils :refer [http-request rootfolder quality-profile-data]]))
+   [doplarr.arr-utils :as utils]
+   [clojure.core.async :as a]))
 
-(defn endpoint [] (str (:radarr-url env) "/api/v3"))
+(def base-url (delay (str (:radarr-url env) "/api/v3")))
+(def api-key  (delay (:radarr-api env)))
+(def rootfolder (delay (utils/rootfolder @base-url @api-key)))
+
+(defn GET [endpoint & [params]]
+  (utils/http-request
+   :get
+   (str @base-url endpoint)
+   @api-key
+   params))
+
+(defn POST [endpoint & [params]]
+  (utils/http-request
+   :post
+   (str @base-url endpoint)
+   @api-key
+   params))
 
 (defn search [search-term]
-  (:body (http-request
-          :get
-          (str (endpoint) "/movie/lookup")
-          (:radarr-api env)
-          {:query-params {:term search-term}})))
+  (let [chan (a/promise-chan)]
+    (a/pipeline
+     1
+     chan
+     (map :body)
+     (GET "/movie/lookup" {:query-params {:term search-term}}))
+    chan))
 
 (defn quality-profiles []
-  (map quality-profile-data
-       (:body (http-request
-               :get
-               (str (endpoint) "/qualityProfile")
-               (:radarr-api env)))))
+  (let [chan (a/promise-chan)]
+    (a/pipeline
+     1
+     chan
+     (map (comp (partial map utils/quality-profile-data) :body))
+     (GET "/qualityProfile"))
+    chan))
 
-(defn determine-quality-profile []
-  (or (:radarr-quality-id env)
-      (->> (quality-profiles)
-           (sort-by :id)
-           first
-           :id)))
-
-(defn default-options []
-  {:qualityProfileId (determine-quality-profile)
-   :monitored true
-   :minimumAvailability "announced"
-   :rootFolderPath (rootfolder (endpoint) (:radarr-api env))
-   :addOptions {:searchForMovie true}})
-
-(defn request [movie]
-  (http-request
-   :post
-   (str (endpoint) "/movie")
-   (:radarr-api env)
-   {:form-params (merge movie (default-options))
-    :content-type :json}))
+(defn request [movie & {:keys [profile-id]}]
+  (a/go
+    (POST
+      "/movie"
+      {:form-params (merge movie
+                           {:qualityProfileId profile-id
+                            :monitored true
+                            :minimumAvailability "announced"
+                            :rootFolderPath (a/<! @rootfolder)
+                            :addOptions {:searchForMovie true}})
+       :content-type :json}))
+  nil)

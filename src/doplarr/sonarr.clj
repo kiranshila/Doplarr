@@ -1,87 +1,112 @@
 (ns doplarr.sonarr
   (:require
+   [com.rpl.specter :as s]
+   [clojure.core.async :as a]
    [config.core :refer [env]]
-   [doplarr.arr-utils :refer [http-request rootfolder quality-profile-data]]))
+   [doplarr.arr-utils :as utils]))
 
-(defn endpoint [] (str (:sonarr-url env) "/api"))
+(def base-url (delay (str (:sonarr-url env) "/api")))
+(def api-key  (delay (:sonarr-api env)))
+(def rootfolder (delay (utils/rootfolder @base-url @api-key)))
 
-(defn quality-profiles []
-  (map quality-profile-data
-       (:body (http-request
-               :get
-               (str (endpoint) "/profile")
-               (:sonarr-api env)))))
+(defn GET [endpoint & [params]]
+  (utils/http-request
+   :get
+   (str @base-url endpoint)
+   @api-key
+   params))
 
-(defn determine-quality-profile []
-  (or (:sonarr-quality-id env)
-      (->> (quality-profiles)
-           (sort-by :id)
-           first
-           :id)))
+(defn POST [endpoint & [params]]
+  (utils/http-request
+   :post
+   (str @base-url endpoint)
+   @api-key
+   params))
 
-(defn default-options []
-  {:profileId (determine-quality-profile)
-   :monitored true
-   :seasonFolder true
-   :rootFolderPath (rootfolder (endpoint) (:sonarr-api env))
-   :addOptions {:searchForMissingEpisodes true}})
+(defn PUT [endpoint & [params]]
+  (utils/http-request
+   :put
+   (str @base-url endpoint)
+   @api-key
+   params))
 
 (defn search [search-term]
-  (:body (http-request
-          :get
-          (str (endpoint) "/series/lookup")
-          (:sonarr-api env)
-          {:query-params {:term search-term}})))
+  (let [chan (a/promise-chan)]
+    (a/pipeline
+     1
+     chan
+     (map :body)
+     (GET "/series/lookup" {:query-params {:term search-term}}))
+    chan))
+
+(defn quality-profiles []
+  (let [chan (a/promise-chan)]
+    (a/pipeline
+     1
+     chan
+     (map (comp (partial map utils/quality-profile-data) :body))
+     (GET "/profile"))
+    chan))
+
+(defn request-options [profile-id]
+  (a/go
+    {:profileId profile-id
+     :monitored true
+     :seasonFolder true
+     :rootFolderPath (a/<! @rootfolder)
+     :addOptions {:searchForMissingEpisodes true}}))
 
 (defn started-aquisition? [series]
   (contains? series :path))
 
-(defn aquired-season? [series season]
-  (and (started-aquisition? series)
-       (get-in series [:seasons season :monitored])))
+(defn request-all [series profile-id]
+  (a/go
+    (let [started? (started-aquisition? series)
+          series (if started?
+                   (s/multi-transform
+                    (s/multi-path
+                     [:seasons
+                      s/ALL
+                      (comp pos? :seasonNumber)
+                      :monitored
+                      (s/terminal-val true)]
+                     [:profileId
+                      (s/terminal-val profile-id)])
+                    series)
+                   (merge series (a/<! (request-options profile-id))))]
+      ((if started? PUT POST)
+       "/series"
+       {:form-params series
+        :content-type :json})))
+  nil)
 
-(defn missing-seasons [series]
-  (if (started-aquisition? series)
-    (map :seasonNumber (filter (complement :monitored) (rest (:seasons series))))
-    (rest (range (:seasonCount series)))))
+(defn request-season [series season profile-id]
+  (a/go
+    (let [started? (started-aquisition? series)
+          series (if started?
+                   (s/multi-transform
+                    (s/multi-path
+                     [:seasons
+                      s/ALL
+                      (comp (partial = season) :seasonNumber)
+                      :monitored
+                      (s/terminal-val true)]
+                     [:profileId
+                      (s/terminal-val profile-id)])
+                    series)
+                   (merge (s/setval [:seasons
+                                     s/ALL
+                                     (comp (partial not= season) :seasonNumber)
+                                     :monitored]
+                                    false series)
+                          (a/<! (request-options profile-id))))]
+      ((if started? PUT POST)
+       "/series"
+       {:form-params series
+        :content-type :json})))
+  nil)
 
-(defn aquired-all-seasons? [series]
-  (empty? (missing-seasons series)))
-
-(defn aquired-specials? [series]
-  (get-in series [:seasons 0 :monitored]))
-
-(defn request-all [series]
-  (http-request
-   :post
-   (str (endpoint) "/series")
-   (:sonarr-api env)
-   {:form-params (merge series (default-options))
-    :content-type :json}))
-
-(defn request-season [series season]
-  (let [started? (started-aquisition? series)
-        series (if started?
-                 (assoc-in series [:seasons season :monitored] true)
-                 (merge (->> (for [ssn (range (inc (:seasonCount series)))]
-                               {:seasonNumber ssn
-                                :monitored (= ssn season)})
-                             (into [])
-                             (assoc series :seasons))
-                        (default-options)))]
-    (http-request
-     (if started? :put :post)
-     (str (endpoint) "/series")
-     (:sonarr-api env)
-     {:form-params series
-      :content-type :json})))
-
-(defn request-specials [series]
-  (http-request
-   :post
-   (str (endpoint) "/series")
-   (:sonarr-api env)
-   {:form-params (merge
-                  (assoc-in series [:seasons 0 :monitored] true)
-                  (default-options))
-    :content-type :json}))
+(defn request [series & {:keys [season profile-id]}]
+  (if (= -1 season)
+    (request-all series profile-id)
+    (request-season series season profile-id)))
