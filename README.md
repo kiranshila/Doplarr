@@ -68,7 +68,7 @@ docker run \
 -e RADARR_API='radarr_api' \
 -e BOT_TOKEN='bot_token' \
 -e ROLE_ID='role_id' \
---name doplarr ghcr.io/kiranshila/doplarr:main
+--name doplarr ghcr.io/kiranshila/doplarr:latest
 
 ```
 
