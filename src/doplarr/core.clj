@@ -124,6 +124,7 @@
   {:id (:id interaction)
    :type (interaction-types (:type interaction))
    :token (:token interaction)
+   :user-id (s/select-one [:member :user :id] interaction)
    :payload
    {:component-type (component-types (get-in interaction [:data :component-type]))
     :component-id (s/select-one [:data :custom-id] interaction)
