@@ -3,17 +3,11 @@
    [com.rpl.specter :as s]
    [clojure.core.async :as a]
    [config.core :refer [env]]
-   [doplarr.arr-utils :as utils]))
+   [doplarr.arr-utils :as utils]
+   [clojure.set :as set]))
 
 (def base-url (delay (str (:overseerr-url env) "/api/v1")))
 (def api-key  (delay (:overseerr-api env)))
-(def rootfolder (delay (utils/rootfolder @base-url @api-key)))
-
-; Test if overseerr is enabled
-; Find discord user in overseer
-; Somehow determine if the user is able to actually perform the request
-; Feed that information back to to the bot
-; Make screen for permission error
 
 (defn GET [endpoint & [params]]
   (utils/http-request
@@ -56,13 +50,12 @@
         (recur (rest ids) (assoc users (a/<! (user-discord-id id)) id))))))
 
 (defn search [term media-type]
-  (let [chan (a/promise-chan)]
-    (a/pipeline
-     1
-     chan
-     (s/traverse-all [:body :results (s/filterer :mediaType (s/pred= media-type))])
-     (GET (str "/search?query=" term))) ; This is a hack, due to Overseerr not playing well with "properly" encoded spaces
-    chan))
+  (a/go
+    (s/select-one [:body
+                   :results
+                   (s/filterer :mediaType (s/pred= media-type))
+                   (s/transformed s/ALL #(assoc % :year (.getYear (java.time.LocalDate/parse (:releaseDate % "0000-01-01")))))]
+                  (a/<! (GET (str "/search?query=" term))))))
 
 (defn search-movie [term]
   (search term "movie"))
@@ -74,6 +67,10 @@
   {:mediaType (:mediaType result)
    :mediaId (:id result)
    :userId user-id})
+
+(defn selection-to-embedable [selection]
+  (->> (set/rename-keys selection {:overview :description})
+       (#(assoc-in % [:remotePoster :url] (:posterPath %)))))
 
 (defn request [body]
   (a/go

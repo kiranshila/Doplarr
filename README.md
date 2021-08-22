@@ -56,6 +56,12 @@ To do this:
 
 1. Copy out your API keys from Settings -> General
 
+### Overseerr
+
+Sonarr/Radarr and Overseerr are mutually exclusive - you only need to configure
+one. If you are using Overseerr, your users must have associated discord IDs, or
+the request will fail.
+
 ## Running with Docker
 
 Simply run with
