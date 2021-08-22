@@ -61,7 +61,7 @@
      1
      chan
      (s/traverse-all [:body :results (s/filterer :mediaType (s/pred= media-type))])
-     (GET "/search" {:query-params {:query term}}))
+     (GET (str "/search?query=" term))) ; This is a hack, due to Overseerr not playing well with "properly" encoded spaces
     chan))
 
 (defn search-movie [term]
