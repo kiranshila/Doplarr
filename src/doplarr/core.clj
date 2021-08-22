@@ -3,6 +3,7 @@
    [com.rpl.specter :as s]
    [doplarr.sonarr :as sonarr]
    [doplarr.radarr :as radarr]
+   [doplarr.config :as config]
    [discljord.messaging :as m]
    [discljord.connections :as c]
    [discljord.events :as e]
@@ -293,26 +294,10 @@
            (m/stop-connection! messaging-ch)
            (a/close!           event-ch)))))
 
-(defn check-config-entry [entry]
-  (when (nil? (entry env))
-    (throw (Exception. (str "Double check the configuration of" entry)))))
-
-(defn validate-config []
-  (let [entries [:sonarr-url
-                 :sonarr-api
-                 :radarr-url
-                 :radarr-api
-                 :bot-token
-                 :role-id]]
-    (doseq [entry entries]
-      (try
-        (check-config-entry entry)
-        (catch Exception e
-          (println e)
-          (System/exit -1))))))
-
 (defn -main
   [& _]
-  (validate-config)
+  (when-not (config/validate-env)
+    (println "Error in configuration")
+    (System/exit -1))
   (run)
   (shutdown-agents))

@@ -77,8 +77,11 @@
 
 (defn request [body]
   (a/go
-    (POST
-      "/request"
-      {:form-params body
-       :content-type :json}))
-  nil)
+    (let [resp (a/<!
+                (POST
+                  "/request"
+                  {:form-params body
+                   :throw-exceptions? false
+                   :content-type :json}))]
+      (when (= (:status resp) 403)
+        resp))))
