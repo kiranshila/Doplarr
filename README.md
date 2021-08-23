@@ -36,6 +36,10 @@ Please consider this software "beta enough" as some of the error handling is pre
 
 ## Setup
 
+### Java
+
+If you are running without Docker, you need to have at least Java 11 installed, such as [adoptopenjdk](https://adoptopenjdk.net/)
+
 ### Discord
 
 1. Create a new [Application](https://discord.com/developers/applications) in Discord
@@ -74,7 +78,7 @@ docker run \
 -e RADARR_API='radarr_api' \
 -e BOT_TOKEN='bot_token' \
 -e ROLE_ID='role_id' \
---name doplarr ghcr.io/kiranshila/doplarr:main
+--name doplarr ghcr.io/kiranshila/doplarr:latest
 
 ```
 
