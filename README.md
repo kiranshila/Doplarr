@@ -36,6 +36,10 @@ Please consider this software "beta enough" as some of the error handling is pre
 
 ## Setup
 
+### Java
+
+If you are running without Docker, you need to have at least Java 11 installed
+
 ### Discord
 
 1. Create a new [Application](https://discord.com/developers/applications) in Discord
