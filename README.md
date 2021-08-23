@@ -38,7 +38,7 @@ Please consider this software "beta enough" as some of the error handling is pre
 
 ### Java
 
-If you are running without Docker, you need to have at least Java 11 installed
+If you are running without Docker, you need to have at least Java 11 installed, such as [adoptopenjdk](https://adoptopenjdk.net/)
 
 ### Discord
 
