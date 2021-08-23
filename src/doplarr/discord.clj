@@ -180,7 +180,7 @@
     (a/alt!
       (a/timeout channel-timeout) (do
                                     (update-interaction-response token timed-out-response)
-                                    nil)
+                                    (throw (Exception. "Interaction timed out")))
       chan ([v] v))))
 
 (defn continue-request [interaction]

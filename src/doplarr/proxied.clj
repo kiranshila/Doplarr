@@ -25,9 +25,9 @@
       (let [results (->> ((search-fn request-type) request-term)
                          a/<!
                          (into [] (take @discord/max-results)))]
-        ; Results selection
+                                        ; Results selection
         (a/<! (discord/update-interaction-response token (discord/search-response results uuid)))
-        ; Wait for selection
+                                        ; Wait for selection
         (when-some [selection-interaction (a/<! (discord/await-interaction chan token))]
           (let [selection-id (Integer/parseInt (s/select-one [:payload :values 0] selection-interaction))
                 selection (ovsr/selection-to-embedable (nth results selection-id))
@@ -36,7 +36,6 @@
                             (a/<! (discord/update-interaction-response token (discord/select-season selection uuid)))
                             (when-some [season-interaction (a/<! (discord/await-interaction chan token))]
                               (Integer/parseInt (s/select-one [:payload :values 0] season-interaction))))]
-            (clojure.pprint/pprint selection)
                                         ; Verify request
             (a/<! (discord/update-interaction-response token (discord/request selection uuid :season season-id)))
                                         ; Wait for the button press, we don't care about the actual interaction

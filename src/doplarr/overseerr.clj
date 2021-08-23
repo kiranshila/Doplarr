@@ -9,6 +9,8 @@
 (def base-url (delay (str (:overseerr-url env) "/api/v1")))
 (def api-key  (delay (:overseerr-api env)))
 
+(def tmdb-poster-path "https://image.tmdb.org/t/p/original")
+
 (defn GET [endpoint & [params]]
   (utils/http-request
    :get
@@ -69,8 +71,8 @@
    :userId user-id})
 
 (defn selection-to-embedable [selection]
-  (->> (set/rename-keys selection {:overview :description})
-       (#(assoc-in % [:remotePoster :url] (:posterPath %)))))
+  (->> (assoc selection :description (:overview selection))
+       (#(assoc % :remotePoster (str tmdb-poster-path (:posterPath %))))))
 
 (defn request [body]
   (a/go
