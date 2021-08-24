@@ -1,4 +1,4 @@
-FROM clojure:openjdk-11-tools-deps-slim-buster
+FROM openjdk:11-jre-buster
 
 ENV \
   DEBCONF_NONINTERACTIVE_SEEN=true \
