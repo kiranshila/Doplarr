@@ -3,8 +3,8 @@
    [com.rpl.specter :as s]
    [clojure.core.async :as a]
    [config.core :refer [env]]
-   [doplarr.arr-utils :as utils]
-   [clojure.set :as set]))
+   [fmnoise.flow :as flow :refer [then else]]
+   [doplarr.arr-utils :as utils]))
 
 (def base-url (delay (str (:overseerr-url env) "/api/v1")))
 (def api-key  (delay (:overseerr-api env)))
@@ -26,22 +26,16 @@
    params))
 
 (defn all-users []
-  (let [chan (a/promise-chan)]
-    (a/pipeline
-     1
-     chan
-     (map (comp :results :body))
-     (GET "/user"))
-    chan))
+  (a/go
+    (->> (a/<! (GET "/user"))
+         (then (comp :results :body))
+         (else utils/fatal-error))))
 
 (defn user-discord-id [id]
-  (let [chan (a/promise-chan)]
-    (a/pipeline
-     1
-     chan
-     (map (comp :discordId :body))
-     (GET (str "/user/" id "/settings/notifications")))
-    chan))
+  (a/go
+    (->> (a/<! (GET (str "/user/" id "/settings/notifications")))
+         (then (comp :discordId :body))
+         (else utils/fatal-error))))
 
 (defn discord-users []
   (a/go-loop [ids (map :id (a/<! (all-users)))
@@ -53,11 +47,17 @@
 
 (defn search [term media-type]
   (a/go
-    (s/select-one [:body
-                   :results
-                   (s/filterer :mediaType (s/pred= media-type))
-                   (s/transformed s/ALL #(assoc % :year (.getYear (java.time.LocalDate/parse (:releaseDate % "0000-01-01")))))]
-                  (a/<! (GET (str "/search?query=" term))))))
+    (->> (a/<! (GET (str "/search?query=" term)))
+         (then (fn [resp] (s/select-one [:body
+                                         :results
+                                         (s/filterer :mediaType (s/pred= media-type))
+                                         (s/transformed s/ALL #(assoc % :year (.getYear
+                                                                               (java.time.LocalDate/parse
+                                                                                (if (empty? (:releaseDate %))
+                                                                                  "0000-01-01"
+                                                                                  (:releaseDate %))))))]
+                                        resp)))
+         (else utils/fatal-error))))
 
 (defn search-movie [term]
   (search term "movie"))
@@ -71,16 +71,12 @@
    :userId user-id})
 
 (defn selection-to-embedable [selection]
-  (->> (assoc selection :description (:overview selection))
-       (#(assoc % :remotePoster (str tmdb-poster-path (:posterPath %))))))
+  (as-> selection s
+    (assoc s :description (:overview s))
+    (assoc s :remotePoster (str tmdb-poster-path (:posterPath s)))))
 
-(defn request [body]
+(defn request [body & {:keys [season]}]
   (a/go
-    (let [resp (a/<!
-                (POST
-                  "/request"
-                  {:form-params body
-                   :throw-exceptions? false
-                   :content-type :json}))]
-      (when (= (:status resp) 403)
-        resp))))
+    (->> (a/<! (POST "/request" {:form-params body
+                                 :content-type :json}))
+         (then (constantly nil)))))

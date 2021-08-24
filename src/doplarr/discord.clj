@@ -34,7 +34,8 @@
        :description "Search term"
        :required true}]}]})
 
-(def timed-out-response {:content "Request timed out, please try again"})
+(def timed-out-response {:content "Request timed out, please try again"
+                         :components []})
 
 (def interaction-types {1 :ping
                         2 :application-command
@@ -178,9 +179,7 @@
 (defn await-interaction [chan token]
   (a/go
     (a/alt!
-      (a/timeout channel-timeout) (do
-                                    (update-interaction-response token timed-out-response)
-                                    (throw (Exception. "Interaction timed out")))
+      (a/timeout channel-timeout) (ex-info "Interaction timed out" {:token token})
       chan ([v] v))))
 
 (defn continue-request [interaction]
