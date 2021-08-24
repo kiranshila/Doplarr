@@ -3,7 +3,7 @@ FROM adoptopenjdk/openjdk11:alpine-jre
 WORKDIR /app
 
 RUN \
-  apk add --no-cache
+  apk add --no-cache \
     ca-certificates \
     tini \
     tzdata
