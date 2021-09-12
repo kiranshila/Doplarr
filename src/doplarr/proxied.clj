@@ -42,7 +42,9 @@
         (flet [selection-interaction (->> (a/<! (discord/await-interaction chan token))
                                           (else timeout-bail))]
               (let [selection-id (Integer/parseInt (s/select-one [:payload :values 0] selection-interaction))
-                    selection (ovsr/selection-to-embedable (nth results selection-id))
+                    selection-raw (nth results selection-id)
+                    details (a/<! (ovsr/details (:id selection-raw) (:mediaType selection-raw)))
+                    selection (ovsr/selection-to-embedable (merge details selection-raw))
                     season-id (when (= request-type :series)
                                         ; Optional season selection for TV shows
                                 (a/<! (discord/update-interaction-response token (discord/select-season selection uuid)))
@@ -57,8 +59,7 @@
                                         ; Send public followup and actually perform request if the user exists
                       (if-let [ovsr-id ((a/<! (ovsr/discord-users)) user-id)]
                         (flet [_ (->> (a/<! (ovsr/request
-                                             (ovsr/result-to-request ovsr-id selection)
-                                             {:season season-id}))
+                                             (ovsr/result-to-request ovsr-id selection :season season-id)))
                                       (then (fn [_] (discord/update-interaction-response token {:content "Requested!"
                                                                                                 :components []})))
                                       (else (fn [_] ;Spooky weird macro nonsense, this *has* to be unary otherwise this breaks, for some reason

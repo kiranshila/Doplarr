@@ -126,7 +126,7 @@
    :label "Request"})
 
 (defn select-menu-option [index result]
-  {:label (:title result)
+  {:label (or (:title result) (:name result))
    :description (:year result)
    :value index})
 

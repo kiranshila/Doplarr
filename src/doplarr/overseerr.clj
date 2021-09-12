@@ -9,7 +9,7 @@
 (def base-url (delay (str (:overseerr-url env) "/api/v1")))
 (def api-key  (delay (:overseerr-api env)))
 
-(def tmdb-poster-path "https://image.tmdb.org/t/p/original")
+(def poster-path "https://image.tmdb.org/t/p/original")
 
 (defn GET [endpoint & [params]]
   (utils/http-request
@@ -53,9 +53,11 @@
                                          (s/filterer :mediaType (s/pred= media-type))
                                          (s/transformed s/ALL #(assoc % :year (.getYear
                                                                                (java.time.LocalDate/parse
-                                                                                (if (empty? (:releaseDate %))
+                                                                                (if (empty? (or (:firstAirDate %)
+                                                                                                (:releaseDate %)))
                                                                                   "0000-01-01"
-                                                                                  (:releaseDate %))))))]
+                                                                                  (or (:firstAirDate %)
+                                                                                      (:releaseDate %)))))))]
                                         resp)))
          (else utils/fatal-error))))
 
@@ -65,17 +67,30 @@
 (defn search-series [term]
   (search term "tv"))
 
-(defn result-to-request [user-id result]
-  {:mediaType (:mediaType result)
-   :mediaId (:id result)
-   :userId user-id})
+(defn details [id media-type]
+  (a/go
+    (->> (a/<! (GET (str (if (= "tv" media-type)
+                           "/tv/"
+                           "/movie/")
+                         id)))
+         (then :body)
+         (else utils/fatal-error))))
+
+(defn result-to-request [user-id result & {:keys [season]}]
+  (cond-> {:mediaType (:mediaType result)
+           :mediaId (:id result)
+           :userId user-id}
+    (= "tv" (:mediaType result)) (assoc :seasons (if (= -1 season)
+                                                   (into [] (range 1 (:seasonCount result)))
+                                                   [season]))))
 
 (defn selection-to-embedable [selection]
   (as-> selection s
+    (assoc s :seasonCount (:numberOfSeasons s))
     (assoc s :description (:overview s))
-    (assoc s :remotePoster (str tmdb-poster-path (:posterPath s)))))
+    (assoc s :remotePoster (str poster-path (:posterPath s)))))
 
-(defn request [body & {:keys [season]}]
+(defn request [body]
   (a/go
     (->> (a/<! (POST "/request" {:form-params body
                                  :content-type :json}))
