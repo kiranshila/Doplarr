@@ -59,8 +59,8 @@
                         (flet [_ (->> (a/<! (ovsr/request
                                              (ovsr/result-to-request ovsr-id selection)
                                              {:season season-id}))
-                                      (then #(discord/update-interaction-response token {:content "Requested!"
-                                                                                         :components []}))
+                                      (then (fn [_] (discord/update-interaction-response token {:content "Requested!"
+                                                                                                :components []})))
                                       (else (fn [_] ;Spooky weird macro nonsense, this *has* to be unary otherwise this breaks, for some reason
                                               (a/<! (discord/update-interaction-response token quota-response))
                                               (ex-info "Quota-error" {}))))]
