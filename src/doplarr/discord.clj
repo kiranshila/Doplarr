@@ -125,6 +125,13 @@
    :custom_id (str "request:" uuid)
    :label "Request"})
 
+(defn request-4k-button [uuid enabled?]
+  {:type 2
+   :style 1
+   :disabled (not enabled?)
+   :custom_id (str "request-4k:" uuid)
+   :label "Request 4K"})
+
 (defn select-menu-option [index result]
   {:label (or (:title result) (:name result))
    :description (:year result)
@@ -163,7 +170,9 @@
 (defn request [selection uuid & {:keys [season profile]}]
   {:content (str "Request this " (if season "series" "movie") " ?")
    :embeds [(selection-embed selection :season season :profile profile)]
-   :components [{:type 1 :components [(request-button uuid true)]}]})
+   :components [{:type 1 :components (filterv identity [(request-button uuid true)
+                                                        (when (:backend-4k selection)
+                                                          (request-4k-button uuid true))])}]})
 
 (defn request-alert [selection & {:keys [season profile]}]
   {:content "This has been requested!"

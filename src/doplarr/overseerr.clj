@@ -45,6 +45,14 @@
       (let [id (first ids)]
         (recur (rest ids) (assoc users (a/<! (user-discord-id id)) id))))))
 
+(defn backend-4k? [media-type]
+  (a/go
+    (->> (a/<! (GET (str "/settings/" (if (= media-type "tv") "sonarr" "radarr"))))
+         (then #(->> (:body %)
+                     (map :is4k)
+                     (some identity)))
+         (else utils/fatal-error))))
+
 (defn search [term media-type]
   (a/go
     (->> (a/<! (GET (str "/search?query=" term)))
@@ -76,10 +84,10 @@
          (then :body)
          (else utils/fatal-error))))
 
-(defn result-to-request [user-id result & {:keys [season]}]
+(defn result-to-request [result & {:keys [season is4k]}]
   (cond-> {:mediaType (:mediaType result)
            :mediaId (:id result)
-           :userId user-id}
+           :is4k is4k}
     (= "tv" (:mediaType result)) (assoc :seasons (if (= -1 season)
                                                    (into [] (range 1 (:seasonCount result)))
                                                    [season]))))
@@ -90,8 +98,9 @@
     (assoc s :description (:overview s))
     (assoc s :remotePoster (str poster-path (:posterPath s)))))
 
-(defn request [body]
+(defn request [body user-id]
   (a/go
     (->> (a/<! (POST "/request" {:form-params body
-                                 :content-type :json}))
+                                 :content-type :json
+                                 :headers {"X-API-User" (str user-id)}}))
          (then (constantly nil)))))
