@@ -21,6 +21,9 @@
 (def missing-user-response {:content "You do not have an associated account on Overseerr"
                             :components []})
 
+(def request-exists-response {:content "This has already been requested"
+                              :components []})
+
 (defn make-request [interaction]
   (let [uuid (str (java.util.UUID/randomUUID))
         id (:id interaction)
@@ -49,12 +52,12 @@
                     fourK-backend? (a/<! (ovsr/backend-4k? (:mediaType selection-raw)))
                     selection (ovsr/selection-to-embedable (merge details selection-raw {:backend-4k fourK-backend?}))
                     season-id (when (= request-type :series)
-                                        ; Optional season selection for TV shows
+                                ; Optional season selection for TV shows
                                 (a/<! (discord/update-interaction-response token (discord/select-season selection uuid)))
                                 (flet [season-interaction (->> (a/<! (discord/await-interaction chan token))
                                                                (else timeout-bail))]
                                       (Integer/parseInt (s/select-one [:payload :values 0] season-interaction))))]
-                                        ; Verify request
+                ; Verify request or display that it has been requested
                 (a/<! (discord/update-interaction-response token (discord/request selection uuid :season season-id)))
                                         ; Wait for the button press
                 (flet [request-interaction (->> (a/<! (discord/await-interaction chan token))
@@ -62,16 +65,18 @@
                        request-4k? (str/starts-with? (s/select-one [:payload :component-id] request-interaction) "request-4k")]
                                         ; Send public followup and actually perform request if the user exists
                       (if-let [ovsr-id ((a/<! (ovsr/discord-users)) user-id)]
-                        (flet [_ (->> (a/<! (ovsr/request
-                                             (ovsr/result-to-request selection :season season-id :is4k request-4k?)
-                                             ovsr-id))
-                                      (then (fn [_] (discord/update-interaction-response token {:content "Requested!"
-                                                                                                :components []})))
-                                      (else (fn [e]
-                                              (let [{:keys [status body] :as data} (ex-data e)
-                                                    msg (second (re-matches #"\{\"message\":\"(.+)\"\}" body))] ; Not sure why this JSON didn't get parsed
-                                                (if (= status 403)
-                                                  (a/<! (discord/update-interaction-response token (request-response msg)))
-                                                  (throw (ex-info "Non 403 error on request" data)))))))]
-                              (a/<! (discord/followup-repsonse token (discord/request-alert selection :season season-id))))
+                        (if (ovsr/selection-requested? selection :season season-id)
+                          (a/<! (discord/update-interaction-response token request-exists-response))
+                          (flet [_ (->> (a/<! (ovsr/request
+                                               (ovsr/selection-to-request selection :season season-id :is4k request-4k?)
+                                               ovsr-id))
+                                        (then (fn [_] (discord/update-interaction-response token {:content "Requested!"
+                                                                                                  :components []})))
+                                        (else (fn [e]
+                                                (let [{:keys [status body] :as data} (ex-data e)
+                                                      msg (second (re-matches #"\{\"message\":\"(.+)\"\}" body))] ; Not sure why this JSON didn't get parsed
+                                                  (if (= status 403)
+                                                    (a/<! (discord/update-interaction-response token (request-response msg)))
+                                                    (throw (ex-info "Non 403 error on request" data)))))))]
+                                (a/<! (discord/followup-repsonse token (discord/request-alert selection :season season-id)))))
                         (discord/update-interaction-response token missing-user-response)))))))))

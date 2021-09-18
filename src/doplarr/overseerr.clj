@@ -9,7 +9,7 @@
 (def base-url (delay (str (:overseerr-url env) "/api/v1")))
 (def api-key  (delay (:overseerr-api env)))
 
-(def poster-path "https://image.tmdb.org/t/p/original")
+(def poster-path "https://image.tmdb.org/t/p/w500")
 
 (defn GET [endpoint & [params]]
   (utils/http-request
@@ -24,26 +24,6 @@
    (str @base-url endpoint)
    @api-key
    params))
-
-(defn all-users []
-  (a/go
-    (->> (a/<! (GET "/user"))
-         (then (comp :results :body))
-         (else utils/fatal-error))))
-
-(defn user-discord-id [id]
-  (a/go
-    (->> (a/<! (GET (str "/user/" id "/settings/notifications")))
-         (then (comp :discordId :body))
-         (else utils/fatal-error))))
-
-(defn discord-users []
-  (a/go-loop [ids (map :id (a/<! (all-users)))
-              users {}]
-    (if (empty? ids)
-      users
-      (let [id (first ids)]
-        (recur (rest ids) (assoc users (a/<! (user-discord-id id)) id))))))
 
 (defn backend-4k? [media-type]
   (a/go
@@ -69,6 +49,34 @@
                                         resp)))
          (else utils/fatal-error))))
 
+(defn num-users []
+  (a/go
+    (->> (a/<! (GET "/user" {:query-params {:take 1}}))
+         (then #(s/select-one [:body :pageInfo :results] %))
+         (else utils/fatal-error))))
+
+(defn all-users []
+  (a/go
+    (->> (a/<! (GET "/user" {:query-params {:take (a/<! (num-users))}}))
+         (then #(->> (s/select-one [:body :results] %)
+                     (map :id)
+                     (into [])))
+         (else utils/fatal-error))))
+
+(defn discord-id [ovsr-id]
+  (a/go
+    (->> (a/<! (GET (str "/user/" ovsr-id)))
+         (then #(s/select-one [:body :settings :discordId] %))
+         (else utils/fatal-error))))
+
+(defn discord-users []
+  (a/go-loop [ids (a/<! (all-users))
+              users {}]
+    (if (empty? ids)
+      users
+      (let [id (first ids)]
+        (recur (rest ids) (assoc users (a/<! (discord-id id)) id))))))
+
 (defn search-movie [term]
   (search term "movie"))
 
@@ -84,13 +92,30 @@
          (then :body)
          (else utils/fatal-error))))
 
-(defn result-to-request [result & {:keys [season is4k]}]
-  (cond-> {:mediaType (:mediaType result)
-           :mediaId (:id result)
+(defn season-requested? [selection season & {:keys [is4k]}]
+  (when-let [info (:mediaInfo selection)]
+    ; Seasons exist, check if the selected season exists
+    (let [seasons (:seasons info)]
+      (if (empty? seasons)
+        true
+        (= 5 ((if is4k :status4k :status) (nth seasons (dec season))))))))
+
+(defn movie-requested? [selection & {:keys [is4k]}]
+  (when-let [info (:mediaInfo selection)]
+    (= 5 ((if is4k :status4k :status) info))))
+
+(defn selection-requested? [selection & {:keys [season is4k]}]
+  (case (:mediaType selection)
+    "tv" (season-requested? selection season :is4k is4k)
+    "movie" (movie-requested? selection :is4k is4k)))
+
+(defn selection-to-request [selection & {:keys [season is4k]}]
+  (cond-> {:mediaType (:mediaType selection)
+           :mediaId (:id selection)
            :is4k is4k}
-    (= "tv" (:mediaType result)) (assoc :seasons (if (= -1 season)
-                                                   (into [] (range 1 (:seasonCount result)))
-                                                   [season]))))
+    (= "tv" (:mediaType selection)) (assoc :seasons (if (= -1 season)
+                                                      (into [] (range 1 (:seasonCount selection)))
+                                                      [season]))))
 
 (defn selection-to-embedable [selection]
   (as-> selection s
