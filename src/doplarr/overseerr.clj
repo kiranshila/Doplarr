@@ -11,6 +11,8 @@
 
 (def poster-path "https://image.tmdb.org/t/p/w500")
 
+(def status [:unknown :pending :processing :partially-available :available])
+
 (defn GET [endpoint & [params]]
   (utils/http-request
    :get
@@ -83,31 +85,27 @@
 (defn search-series [term]
   (search term "tv"))
 
-(defn details [id media-type]
-  (a/go
-    (->> (a/<! (GET (str (if (= "tv" media-type)
-                           "/tv/"
-                           "/movie/")
-                         id)))
-         (then :body)
-         (else utils/fatal-error))))
+(defn details
+  ([selection] (details (:id selection) (:mediaType selection)))
+  ([id media-type]
+   (a/go
+     (->> (a/<! (GET (str "/" media-type "/" id)))
+          (then :body)
+          (else utils/fatal-error)))))
 
-(defn season-requested? [selection season & {:keys [is4k]}]
+(defn season-status [selection season & {:keys [is4k]}]
   (when-let [info (:mediaInfo selection)]
-    ; Seasons exist, check if the selected season exists
-    (let [seasons (:seasons info)]
-      (if (empty? seasons)
-        true
-        (= 5 ((if is4k :status4k :status) (nth seasons (dec season))))))))
+    (when-let [[& seasons] (:seasons info)]
+      (status (dec ((if is4k :status4k :status) (nth seasons (dec season))))))))
 
-(defn movie-requested? [selection & {:keys [is4k]}]
+(defn movie-status [selection & {:keys [is4k]}]
   (when-let [info (:mediaInfo selection)]
-    (= 5 ((if is4k :status4k :status) info))))
+    (status (dec ((if is4k :status4k :status) info)))))
 
-(defn selection-requested? [selection & {:keys [season is4k]}]
+(defn selection-status [selection & {:keys [season is4k]}]
   (case (:mediaType selection)
-    "tv" (season-requested? selection season :is4k is4k)
-    "movie" (movie-requested? selection :is4k is4k)))
+    "tv" (season-status selection season :is4k is4k)
+    "movie" (movie-status selection :is4k is4k)))
 
 (defn selection-to-request [selection & {:keys [season is4k]}]
   (cond-> {:mediaType (:mediaType selection)
@@ -123,9 +121,15 @@
     (assoc s :description (:overview s))
     (assoc s :remotePoster (str poster-path (:posterPath s)))))
 
-(defn request [body user-id]
+(defn post-process-selection [selection]
+  (a/go
+    (let [details (a/<! (details selection))
+          fourK-backend? (a/<! (backend-4k? (:mediaType selection)))]
+      (selection-to-embedable (merge details selection {:backend-4k fourK-backend?})))))
+
+(defn request [body & {:keys [ovsr-id]}]
   (a/go
     (->> (a/<! (POST "/request" {:form-params body
                                  :content-type :json
-                                 :headers {"X-API-User" (str user-id)}}))
+                                 :headers {"X-API-User" (str ovsr-id)}}))
          (then (constantly nil)))))

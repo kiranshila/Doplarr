@@ -1,20 +1,14 @@
 (ns doplarr.core
   (:require
-   [doplarr.discord :as discord]
    [doplarr.config :as config]
-   [doplarr.direct :as direct]
-   [doplarr.proxied :as proxied]
+   [doplarr.interaction-state-machine :as ism]
+   [doplarr.discord :as discord]
    [discljord.messaging :as m]
    [discljord.connections :as c]
    [discljord.events :as e]
    [config.core :refer [env]]
    [clojure.core.async :as a])
   (:gen-class))
-
-(def backend (delay (config/backend)))
-
-(def backend-request {:direct #'doplarr.direct/make-request
-                      :proxied #'doplarr.proxied/make-request})
 
 ;;;;;;;;;;;;;;;;;;;;;;;; Gateway event handlers
 (defmulti handle-event
@@ -25,8 +19,8 @@
   [_ data]
   (let [interaction (discord/interaction-data data)]
     (case (:type interaction)
-      :application-command ((backend-request @backend) interaction) ; These will all be requests as that is the only top level command
-      :message-component (discord/continue-request interaction))))
+      :application-command (ism/start-interaction interaction)
+      :message-component (ism/continue-interaction interaction))))
 
 (defmethod handle-event :ready
   [_ {{id :id} :user}]

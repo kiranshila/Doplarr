@@ -3,9 +3,7 @@
    [config.core :refer [env]]
    [discljord.messaging :as m]
    [clojure.core.cache.wrapped :as cache]
-   [clojure.core.async :as a]
-   [com.rpl.specter :as s]
-   [clojure.string :as str]))
+   [com.rpl.specter :as s]))
 
 (defonce state (atom nil))
 (defonce cache (cache/ttl-cache-factory {} :ttl 900000)) ; 15 Minute cache expiration, coinciding with the interaction token
@@ -14,12 +12,12 @@
 
 (def request-command
   {:name "request"
-   :description "Requests a series or movie"
+   :description "Request a series or movie"
    :default_permission false
    :options
    [{:type 1
      :name "series"
-     :description "Requests a series"
+     :description "Request a series"
      :options
      [{:type 3
        :name "term"
@@ -27,15 +25,16 @@
        :required true}]}
     {:type 1
      :name "movie"
-     :description "Requests a movie",
+     :description "Request a movie",
      :options
      [{:type 3
        :name "term"
        :description "Search term"
        :required true}]}]})
 
-(def timed-out-response {:content "Request timed out, please try again"
-                         :components []})
+(defn content-response [content]
+  {:content content
+   :components []})
 
 (def interaction-types {1 :ping
                         2 :application-command
@@ -148,8 +147,13 @@
   (if (empty? results)
     {:content "Search result returned no hits"}
     (dropdown "Choose one of the following results"
-              (str "select:" uuid)
+              (str "result-select:" uuid)
               (map-indexed select-menu-option results))))
+
+(defn select-profile [profiles uuid]
+  (dropdown "Which quality profile?"
+            (str "profile-select:" uuid)
+            (map #(hash-map :label (:name %) :value (:id %)) profiles)))
 
 (defn selection-embed [selection & {:keys [season profile]}]
   {:title (:title selection)
@@ -180,18 +184,10 @@
 
 (defn select-season [series uuid]
   (dropdown "Which season?"
-            (str "select_season:" uuid)
+            (str "season-select:" uuid)
             (conj (map #(hash-map :label (str "Season: " %) :value %)
                        (range 1 (inc (:seasonCount series))))
                   {:label "All Seasons" :value "-1"})))
 
-(defn await-interaction [chan token]
-  (a/go
-    (a/alt!
-      (a/timeout channel-timeout) (ex-info "Interaction timed out" {:token token})
-      chan ([v] v))))
-
-(defn continue-request [interaction]
-  (let [[_ uuid] (str/split (s/select-one [:payload :component-id] interaction) #":")]
-    (interaction-response (:id interaction) (:token interaction) 6)
-    (a/offer! (get @cache uuid) interaction)))
+(defn dropdown-index [interaction]
+  (Integer/parseInt (s/select-one [:payload :values 0] interaction)))

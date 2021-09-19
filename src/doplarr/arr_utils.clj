@@ -7,7 +7,7 @@
 
 (defn fatal-error [ex]
   (log/fatal ex)
-  (System/exit -1))
+  #_(System/exit -1))
 
 (defn deep-merge [a & maps]
   (if (map? a)
