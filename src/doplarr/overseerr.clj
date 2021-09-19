@@ -93,7 +93,7 @@
           (then :body)
           (else utils/fatal-error)))))
 
-(defn season-status [selection season & {:keys [is4k]}]
+(defn season-status [selection & {:keys [season is4k]}]
   (when-let [info (:mediaInfo selection)]
     (when-let [[& seasons] (:seasons info)]
       (status (dec ((if is4k :status4k :status) (nth seasons (dec season))))))))
@@ -101,11 +101,6 @@
 (defn movie-status [selection & {:keys [is4k]}]
   (when-let [info (:mediaInfo selection)]
     (status (dec ((if is4k :status4k :status) info)))))
-
-(defn selection-status [selection & {:keys [season is4k]}]
-  (case (:mediaType selection)
-    "tv" (season-status selection season :is4k is4k)
-    "movie" (movie-status selection :is4k is4k)))
 
 (defn selection-to-request [selection & {:keys [season is4k]}]
   (cond-> {:mediaType (:mediaType selection)

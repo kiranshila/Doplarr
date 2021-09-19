@@ -52,3 +52,13 @@
                             :addOptions {:searchForMovie true}})
        :content-type :json}))
   nil)
+
+(defn movie-status [movie & _]
+  (cond
+    (and (:hasFile movie)
+         (:isAvailable movie)
+         (:monitored movie)) :available
+    (and (not (:hasFile movie))
+         (:isAvailable movie)
+         (:monitored movie)) :processing
+    :else nil))

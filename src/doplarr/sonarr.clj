@@ -110,3 +110,19 @@
   (if (= -1 season)
     (request-all series profile-id)
     (request-season series season profile-id)))
+
+(defn post-process-series [series]
+  (a/go
+    (if-let [id (:id series)]
+      (merge series (:body (a/<! (GET (str "/series/" id)))))
+      series)))
+
+(defn season-status [series & {:keys [season]}]
+  (let [ssn (->> (:seasons series)
+                 (filter (comp (partial = season) :seasonNumber))
+                 first)]
+    (when-let [stats (:statistics ssn)]
+      (when (:monitored ssn)
+        (cond
+          (> 100.0 (:percentOfEpisodes stats)) :processing
+          :else :available)))))

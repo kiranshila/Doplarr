@@ -22,21 +22,26 @@
                   :direct {:series sonarr/quality-profiles
                            :movie radarr/quality-profiles}})
 
-(def process-selection-fn {:overseerr ovsr/post-process-selection
-                           :direct #(a/go (identity %))})
+(def process-selection-fn {:overseerr {:series ovsr/post-process-selection
+                                       :movie ovsr/post-process-selection}
+                           :direct {:series sonarr/post-process-series
+                                    :movie (fn [movie] (a/go movie))}})
 
 (def request-selection-fn {:overseerr ovsr/selection-to-request
                            :direct identity})
+
+(def account-id-fn {:overseerr #(a/go ((a/<! (ovsr/discord-users)) %))
+                    :direct (fn [_] (a/go 1))}) ; Dummy id to get around account check
 
 (def request-fn {:overseerr {:series ovsr/request
                              :movie ovsr/request}
                  :direct    {:series sonarr/request
                              :movie radarr/request}})
 
-(def content-status-fn {:overseerr {:series ovsr/selection-status
-                                    :movie ovsr/selection-status}
-                        :direct    {:series sonarr/started-aquisition?
-                                    :movie (constantly nil)}}) ;FIXME
+(def content-status-fn {:overseerr {:series ovsr/season-status
+                                    :movie ovsr/movie-status}
+                        :direct    {:series sonarr/season-status
+                                    :movie radarr/movie-status}})
 
 (defn start-interaction [interaction]
   (let [uuid (str (java.util.UUID/randomUUID))
@@ -63,7 +68,7 @@
           selection-id (discord/dropdown-index interaction)
           profiles (->> (a/<! (((profiles-fn @backend) request-type)))
                         (into []))
-          selection (a/<! ((process-selection-fn @backend) (nth results selection-id)))]
+          selection (a/<! (((process-selection-fn @backend) request-type) (nth results selection-id)))]
       (case request-type
         :series (discord/update-interaction-response token (discord/select-season selection uuid))
         :movie  (case @backend
@@ -91,8 +96,8 @@
   (a/go
     (let [{:keys [token selection season profile request-type profile-id is4k]} (get @discord/cache uuid)
           user-id (:user-id interaction)
-          ovsr-id ((a/<! (ovsr/discord-users)) user-id)]
-      (if (nil? ovsr-id)
+          backend-id ((account-id-fn @backend) user-id)]
+      (if (nil? backend-id)
         (discord/update-interaction-response token (discord/content-response "You do not have an associated account on Overseerr"))
         (case (((content-status-fn @backend) request-type) selection :season season :is4k is4k)
           :pending (discord/update-interaction-response token (discord/content-response "This has been requested, and the request is pending."))
@@ -100,7 +105,7 @@
           :available (discord/update-interaction-response token (discord/content-response "This is already available!"))
           (->> (a/<! (((request-fn @backend) request-type)
                       ((request-selection-fn @backend) selection :season season :is4k (boolean is4k))
-                      :ovsr-id ovsr-id
+                      :ovsr-id backend-id
                       :profile-id profile-id))
                (then (fn [_]
                        (discord/update-interaction-response token (discord/content-response "Requested!"))
