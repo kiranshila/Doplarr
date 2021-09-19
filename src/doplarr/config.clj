@@ -16,7 +16,7 @@
 ;; Default to overseerr if both are configured
 (defn backend []
   (cond
-    (every? env overseerr-requirements) :proxied
+    (every? env overseerr-requirements) :overseerr
     (every? env direct-requirements) :direct
     :else nil))
 
