@@ -21,11 +21,13 @@
 ### Caveats
 
 I wanted a clean app for the sole purpose of requesting movies/TV shows.
-I personally didn't need Siri or Ombi integration - so those are missing in this
-bot. If you need Ombi support, I suggest you check out Overseerr instead.
+I personally didn't need Siri integration, support for old API versions, Ombi,
+etc., so those features are missing here.
+If you need Ombi support (for managing many people requesting), I suggest you check out Overseerr instead.
 There is only a boolean permission (role gated) for who has access to the bot, nothing fancy.
 
-If any of these don't suit your fancy, check out [Requestrr](https://github.com/darkalfx/requestrr)
+If any of these don't suit your fancy, check out
+[Requestrr](https://github.com/darkalfx/requestrr)
 
 ### Screenshots
 
@@ -33,11 +35,27 @@ If any of these don't suit your fancy, check out [Requestrr](https://github.com/
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Selection.png" width="400">
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/button.png" width="400">
 
+### FAQ
+
+#### Will you support Lidarr/Readarr/\*arr
+
+Not yet. The idea is that one can work directly with the collection managers or
+work through a request manager (Overseerr). As Overseerr doesn't support
+collections managers other than radarr/sonarr and I want feature-parity, those
+other managers will be left out until Overseerr supports them.
+
+#### Why are the commands greyed out?
+
+Due to how slash command permissions work in Discord, every user that intends to
+use the bot must have the assigned role you created. That _includes_ the server
+owner/admins. Make sure that you assigned the role to yourself and the role ID
+you copied is correct.
+
 ## Setup
 
 ### Java
 
-If you are running without Docker, you need to have at least Java 11 installed, such as [adoptopenjdk](https://adoptopenjdk.net/)
+If you are running without Docker, you need to have at least Java 11 installed, such as [adoptium](https://adoptium.net/)
 
 ### Discord
 
