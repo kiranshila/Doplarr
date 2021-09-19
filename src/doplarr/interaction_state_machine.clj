@@ -28,7 +28,7 @@
                                     :movie (fn [movie] (a/go movie))}})
 
 (def request-selection-fn {:overseerr ovsr/selection-to-request
-                           :direct identity})
+                           :direct (fn [selection & _] selection)})
 
 (def account-id-fn {:overseerr #(a/go ((a/<! (ovsr/discord-users)) %))
                     :direct (fn [_] (a/go 1))}) ; Dummy id to get around account check
