@@ -95,7 +95,7 @@
 
 (defn season-status [selection & {:keys [season is4k]}]
   (when-let [info (:mediaInfo selection)]
-    (when-let [[& seasons] (:seasons info)]
+    (when-let [seasons (seq (:seasons info))]
       (status (dec ((if is4k :status4k :status) (nth seasons (dec season))))))))
 
 (defn movie-status [selection & {:keys [is4k]}]
