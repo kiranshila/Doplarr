@@ -50,8 +50,7 @@
                             :minimumAvailability "announced"
                             :rootFolderPath (a/<! @rootfolder)
                             :addOptions {:searchForMovie true}})
-       :content-type :json}))
-  nil)
+       :content-type :json})))
 
 (defn movie-status [movie & _]
   (cond

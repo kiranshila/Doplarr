@@ -77,8 +77,7 @@
       ((if started? PUT POST)
        "/series"
        {:form-params series
-        :content-type :json})))
-  nil)
+        :content-type :json}))))
 
 (defn request-season [series season profile-id]
   (a/go
@@ -103,8 +102,7 @@
       ((if started? PUT POST)
        "/series"
        {:form-params series
-        :content-type :json})))
-  nil)
+        :content-type :json}))))
 
 (defn request [series & {:keys [season profile-id]}]
   (if (= -1 season)
