@@ -96,7 +96,7 @@
   (a/go
     (let [{:keys [token selection season profile request-type profile-id is4k]} (get @discord/cache uuid)
           user-id (:user-id interaction)
-          backend-id ((account-id-fn @backend) user-id)]
+          backend-id (a/<! ((account-id-fn @backend) user-id))]
       (if (nil? backend-id)
         (discord/update-interaction-response token (discord/content-response "You do not have an associated account on Overseerr"))
         (case (((content-status-fn @backend) request-type) selection :season season :is4k is4k)
@@ -130,7 +130,7 @@
     (let [{:keys [token last-modified]} (get @discord/cache uuid)]
       (if (> (- now last-modified) discord/channel-timeout)
         ; Update interaction with timeout message
-        (discord/update-interaction-response token (discord/content-response "Request times out, please try again."))
+        (discord/update-interaction-response token (discord/content-response "Request timed out, please try again."))
         ; Move through the state machine to update cache side effecting new components
         (do
           (swap! discord/cache assoc-in [uuid :last-modified] now)
