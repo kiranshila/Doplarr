@@ -128,3 +128,10 @@
                                  :content-type :json
                                  :headers {"X-API-User" (str ovsr-id)}}))
          (then (constantly nil)))))
+
+(defn partial-seasons? []
+  (a/go
+    (->> (a/<! (GET "/settings/main"))
+         (then #(->> (:body %)
+                     :partialRequestsEnabled))
+         (else utils/fatal-error))))
