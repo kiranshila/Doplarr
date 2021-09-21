@@ -111,6 +111,7 @@
           :available (discord/update-interaction-response token (discord/content-response "This is already available!"))
           (->> (a/<! (((request-fn @backend) request-type)
                       ((request-selection-fn @backend) selection :season season :is4k (boolean is4k))
+                      :season season
                       :ovsr-id backend-id
                       :profile-id profile-id))
                (then (fn [_]

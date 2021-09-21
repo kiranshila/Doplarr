@@ -8,7 +8,8 @@
 
 (def base-url (delay (str (:sonarr-url env) "/api")))
 (def api-key  (delay (:sonarr-api env)))
-(def rootfolder (delay (utils/rootfolder @base-url @api-key)))
+
+(defn rootfolder [] (utils/rootfolder @base-url @api-key))
 
 (defn GET [endpoint & [params]]
   (utils/http-request
@@ -49,16 +50,31 @@
     {:profileId profile-id
      :monitored true
      :seasonFolder true
-     :rootFolderPath (a/<! @rootfolder)
-     :addOptions {:searchForMissingEpisodes true}}))
+     :rootFolderPath (a/<! (rootfolder))
+     :addOptions {:ignoreEpisodesWithFiles true
+                  :searchForMissingEpisodes true}}))
 
-(defn started-aquisition? [series]
-  (contains? series :path))
+(defn execute-command [command & {:as opts}]
+  (a/go
+    (->> (a/<! (POST "/command" {:form-params (merge {:name command} opts)
+                                 :content-type :json}))
+         (then (constantly nil)))))
+
+(defn search-season [series-id season]
+  (a/go
+    (->> (a/<! (execute-command "SeasonSearch" {:seriesId series-id
+                                                :seasonNumber season})))
+    (then (constantly nil))))
+
+(defn search-series [series-id]
+  (a/go
+    (->> (a/<! (execute-command "SeriesSearch" {:seriesId series-id})))
+    (then (constantly nil))))
 
 (defn request-all [series profile-id]
   (a/go
-    (let [started? (started-aquisition? series)
-          series (if started?
+    (let [id (:id series)
+          series (if id
                    (s/multi-transform
                     (s/multi-path
                      [:seasons
@@ -70,16 +86,18 @@
                       (s/terminal-val profile-id)])
                     series)
                    (merge series (a/<! (request-options profile-id))))]
-      (->> (a/<! ((if started? PUT POST)
+      (->> (a/<! ((if id PUT POST)
                   "/series"
                   {:form-params series
                    :content-type :json}))
-           (then (constantly nil))))))
+           (then (fn [_]
+                   (when id
+                     (search-series id))))))))
 
 (defn request-season [series season profile-id]
   (a/go
-    (let [started? (started-aquisition? series)
-          series (if started?
+    (let [id (:id series)
+          series (if id
                    (s/multi-transform
                     (s/multi-path
                      [:seasons
@@ -96,11 +114,13 @@
                                      :monitored]
                                     false series)
                           (a/<! (request-options profile-id))))]
-      (->> (a/<! ((if started? PUT POST)
+      (->> (a/<! ((if id PUT POST)
                   "/series"
                   {:form-params series
                    :content-type :json}))
-           (then (constantly nil))))))
+           (then (fn [_]
+                   (when id
+                     (search-season id season))))))))
 
 (defn request [series & {:keys [season profile-id]}]
   (if (= -1 season)

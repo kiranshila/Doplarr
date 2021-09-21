@@ -7,7 +7,8 @@
 
 (def base-url (delay (str (:radarr-url env) "/api/v3")))
 (def api-key  (delay (:radarr-api env)))
-(def rootfolder (delay (utils/rootfolder @base-url @api-key)))
+
+(defn rootfolder [] (utils/rootfolder @base-url @api-key))
 
 (defn GET [endpoint & [params]]
   (utils/http-request
@@ -44,7 +45,7 @@
                                       {:qualityProfileId profile-id
                                        :monitored true
                                        :minimumAvailability "announced"
-                                       :rootFolderPath (a/<! @rootfolder)
+                                       :rootFolderPath (a/<! (rootfolder))
                                        :addOptions {:searchForMovie true}})
                   :content-type :json}))
          (then (constantly nil)))))
