@@ -3,6 +3,7 @@
    [com.rpl.specter :as s]
    [clojure.core.async :as a]
    [config.core :refer [env]]
+   [fmnoise.flow :as flow :refer [then else]]
    [doplarr.arr-utils :as utils]))
 
 (def base-url (delay (str (:sonarr-url env) "/api")))
@@ -30,23 +31,18 @@
    @api-key
    params))
 
-(defn search [search-term]
-  (let [chan (a/promise-chan)]
-    (a/pipeline
-     1
-     chan
-     (map :body)
-     (GET "/series/lookup" {:query-params {:term search-term}}))
-    chan))
+(defn search [term]
+  (a/go
+    (->> (a/<! (GET "/series/lookup" {:query-params {:term term}}))
+         (then :body)
+         (else utils/fatal-error))))
 
 (defn quality-profiles []
-  (let [chan (a/promise-chan)]
-    (a/pipeline
-     1
-     chan
-     (map (comp (partial map utils/quality-profile-data) :body))
-     (GET "/profile"))
-    chan))
+  (a/go
+    (->> (a/<! (GET "/profile"))
+         (then #(->> (:body %)
+                     (map utils/quality-profile-data)))
+         (else utils/fatal-error))))
 
 (defn request-options [profile-id]
   (a/go
@@ -74,10 +70,11 @@
                       (s/terminal-val profile-id)])
                     series)
                    (merge series (a/<! (request-options profile-id))))]
-      ((if started? PUT POST)
-       "/series"
-       {:form-params series
-        :content-type :json}))))
+      (->> (a/<! ((if started? PUT POST)
+                  "/series"
+                  {:form-params series
+                   :content-type :json}))
+           (then (constantly nil))))))
 
 (defn request-season [series season profile-id]
   (a/go
@@ -99,10 +96,11 @@
                                      :monitored]
                                     false series)
                           (a/<! (request-options profile-id))))]
-      ((if started? PUT POST)
-       "/series"
-       {:form-params series
-        :content-type :json}))))
+      (->> (a/<! ((if started? PUT POST)
+                  "/series"
+                  {:form-params series
+                   :content-type :json}))
+           (then (constantly nil))))))
 
 (defn request [series & {:keys [season profile-id]}]
   (if (= -1 season)
@@ -112,7 +110,10 @@
 (defn post-process-series [series]
   (a/go
     (if-let [id (:id series)]
-      (merge series (:body (a/<! (GET (str "/series/" id)))))
+      (->> (a/<! (GET (str "/series/" id)))
+           (then #(->> (:body %)
+                       (merge series)))
+           (else utils/fatal-error))
       series)))
 
 (defn season-status [series & {:keys [season]}]
