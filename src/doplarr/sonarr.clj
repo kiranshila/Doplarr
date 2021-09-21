@@ -103,8 +103,11 @@
                      [:seasons
                       s/ALL
                       (comp (partial = season) :seasonNumber)
-                      :monitored
-                      (s/terminal-val true)]
+                      (s/multi-path
+                       [:monitored
+                        (s/terminal-val true)]
+                       [:statistics
+                        (s/terminal #(assoc % :episodeCount (:totalEpisodeCount %)))])]
                      [:profileId
                       (s/terminal-val profile-id)])
                     series)
