@@ -1,6 +1,6 @@
 {:paths ["src" "resources"]
 
- :deps {org.clojure/clojure {:mvn/version "1.11.0-alpha2"}
+ :deps {org.clojure/clojure {:mvn/version "1.11.0-alpha1"}
         org.clojure/core.cache {:mvn/version "1.0.217"}
         yogthos/config {:mvn/version "1.1.8"}
         com.rpl/specter {:mvn/version "1.1.3"}
