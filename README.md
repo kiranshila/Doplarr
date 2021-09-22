@@ -21,12 +21,13 @@
 ### Caveats
 
 I wanted a clean app for the sole purpose of requesting movies/TV shows.
-I personally didn't need Siri, Overseerr, or Ombi integration - so those are missing in this bot (for now).
+I personally didn't need Siri integration, support for old API versions, Ombi,
+etc., so those features are missing here.
+If you need Ombi support (for managing many people requesting), I suggest you check out Overseerr instead.
 There is only a boolean permission (role gated) for who has access to the bot, nothing fancy.
 
-If any of these don't suit your fancy, check out [Requestrr](https://github.com/darkalfx/requestrr)
-
-Please consider this software "beta enough" as some of the error handling is pretty rough around the edges - however I've been using this for a bit now on my own server without any issues, but of course your mileage may vary.
+If any of these don't suit your fancy, check out
+[Requestrr](https://github.com/darkalfx/requestrr)
 
 ### Screenshots
 
@@ -34,11 +35,27 @@ Please consider this software "beta enough" as some of the error handling is pre
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Selection.png" width="400">
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/button.png" width="400">
 
+### FAQ
+
+#### Will you support Lidarr/Readarr/\*arr
+
+Not yet. The idea is that one can work directly with the collection managers or
+work through a request manager (Overseerr). As Overseerr doesn't support
+collections managers other than radarr/sonarr and I want feature-parity, those
+other managers will be left out until Overseerr supports them.
+
+#### Why are the commands greyed out?
+
+Due to how slash command permissions work in Discord, every user that intends to
+use the bot must have the assigned role you created. That _includes_ the server
+owner/admins. Make sure that you assigned the role to yourself and the role ID
+you copied is correct.
+
 ## Setup
 
 ### Java
 
-If you are running without Docker, you need to have at least Java 11 installed, such as [adoptopenjdk](https://adoptopenjdk.net/)
+If you are running without Docker, you need to have at least Java 11 installed, such as [adoptium](https://adoptium.net/)
 
 ### Discord
 
@@ -56,9 +73,25 @@ To do this:
 1. Enable Developer Mode (User Settings -> Advanced -> Developer Mode)
 2. Under your server settings, go to Roles, find the role and "Copy ID"
 
+Every user that you wish to have access to the slash commands needs to be
+assigned this role (even the server owner/admins).
+
 ### Sonarr/Radarr
 
 1. Copy out your API keys from Settings -> General
+
+### Overseerr
+
+Sonarr/Radarr and Overseerr are mutually exclusive - you only need to configure
+one. If you are using Overseerr, your users must have associated discord IDs, or
+the request will fail.
+
+This bot isn't meant to wrap the entirety of what Overseerr can do, just the
+necessary bits for requesting with optional 4K and quota support. Just use the
+web interface to Overseerr if you need more features.
+
+In the config, you replace `SONARR_URL`, `SONARR_API`, `RADARR_URL`,
+`RADARR_API` with `OVERSEERR_URL` and `OVERSEERR_API`.
 
 ## Running with Docker
 
@@ -73,7 +106,6 @@ docker run \
 -e BOT_TOKEN='bot_token' \
 -e ROLE_ID='role_id' \
 --name doplarr ghcr.io/kiranshila/doplarr:latest
-
 ```
 
 ## Building and Running Locally

@@ -5,14 +5,15 @@
         yogthos/config {:mvn/version "1.1.8"}
         com.rpl/specter {:mvn/version "1.1.3"}
         ch.qos.logback/logback-classic {:mvn/version "1.2.5"}
-        org.suskalo/discljord {:git/url "https://github.com/IGJoshua/discljord" :sha "a417b0d543c68820ce0633b31d7c98c6b328c857"}
+        org.suskalo/discljord {:mvn/version "1.3.0-SNAPSHOT"}
         org.clojure/core.async {:mvn/version "1.3.618"}
         cheshire/cheshire {:mvn/version "5.10.1"}
+        fmnoise/flow {:mvn/version "4.1.0"}
         hato/hato {:mvn/version "0.8.2"}}
 
  :jvm-opts ["-Dconfig=config.edn"]
 
  :aliases {:build {:extra-paths ["build"]
-                   :deps {io.github.clojure/tools.build {:git/tag "v0.1.6" :git/sha "5636e61"}
-                          com.github.seancorfield/depstar {:mvn/version "2.1.278"}}
+                   :deps {io.github.seancorfield/build-clj
+                          {:git/tag "v0.3.1" :git/sha "996ddfa"}}
                    :ns-default build}}}
