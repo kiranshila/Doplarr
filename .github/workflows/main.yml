@@ -25,7 +25,7 @@ jobs:
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@3.5
         with:
-          cli: latest
+          cli: 1.10.3.981
 
       - name: Build bot
         run: clojure -T:build uber
