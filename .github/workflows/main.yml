@@ -28,7 +28,7 @@ jobs:
           cli: latest
 
       - name: Build bot
-        run: clojure -T:build uberjar
+        run: clojure -T:build uber
         shell: bash
 
       - name: Release tagged version
@@ -37,7 +37,7 @@ jobs:
         with:
           token: ${{ secrets.RELEASE_TOKEN }}
           files: |
-            target/Doplarr.jar
+            target/doplarr.jar
             config.edn
 
       - name: Log in to the Container registry
