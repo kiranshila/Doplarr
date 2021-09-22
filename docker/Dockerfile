@@ -10,7 +10,7 @@ RUN \
 
 COPY . /app
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["java","-jar","/app/target/doplarr.jar"]
+CMD ["java","-jar","/app/doplarr.jar"]
 
 LABEL "maintainer"="Kiran Shila <me@kiranshila.com>"
 LABEL "org.opencontainers.image.source"="https://github.com/kiranshila/Doplarr"
