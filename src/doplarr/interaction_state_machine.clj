@@ -12,36 +12,36 @@
 
 (def backend (delay (config/backend)))
 
-(def search-fn {:overseerr {:series ovsr/search-series
-                            :movie ovsr/search-movie}
-                :direct    {:series sonarr/search
-                            :movie radarr/search}})
+(def search-fn {:overseerr {:series #'ovsr/search-series
+                            :movie #'ovsr/search-movie}
+                :direct    {:series #'sonarr/search
+                            :movie #'radarr/search}})
 
 (def profiles-fn {:overseerr {:series #(a/go nil)
                               :movie #(a/go nil)}
-                  :direct {:series sonarr/quality-profiles
-                           :movie radarr/quality-profiles}})
+                  :direct {:series #'sonarr/quality-profiles
+                           :movie #'radarr/quality-profiles}})
 
-(def process-selection-fn {:overseerr {:series ovsr/post-process-selection
-                                       :movie ovsr/post-process-selection}
-                           :direct {:series sonarr/post-process-series
+(def process-selection-fn {:overseerr {:series #'ovsr/post-process-selection
+                                       :movie #'ovsr/post-process-selection}
+                           :direct {:series #'sonarr/post-process-series
                                     :movie (fn [movie] (a/go movie))}})
 
-(def request-selection-fn {:overseerr ovsr/selection-to-request
+(def request-selection-fn {:overseerr #'ovsr/selection-to-request
                            :direct (fn [selection & _] selection)})
 
 (def account-id-fn {:overseerr #(a/go ((a/<! (ovsr/discord-users)) %))
                     :direct (fn [_] (a/go 1))}) ; Dummy id to get around account check
 
-(def request-fn {:overseerr {:series ovsr/request
-                             :movie ovsr/request}
-                 :direct    {:series sonarr/request
-                             :movie radarr/request}})
+(def request-fn {:overseerr {:series #'ovsr/request
+                             :movie #'ovsr/request}
+                 :direct    {:series #'sonarr/request
+                             :movie #'radarr/request}})
 
-(def content-status-fn {:overseerr {:series ovsr/season-status
-                                    :movie ovsr/movie-status}
-                        :direct    {:series sonarr/season-status
-                                    :movie radarr/movie-status}})
+(def content-status-fn {:overseerr {:series #'ovsr/season-status
+                                    :movie #'ovsr/movie-status}
+                        :direct    {:series #'sonarr/season-status
+                                    :movie #'radarr/movie-status}})
 
 (defn start-interaction [interaction]
   (let [uuid (str (java.util.UUID/randomUUID))
