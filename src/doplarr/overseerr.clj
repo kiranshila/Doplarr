@@ -93,10 +93,16 @@
           (then :body)
           (else utils/fatal-error)))))
 
-(defn season-status [selection & {:keys [season is4k]}]
+(defn series-status [selection & {:keys [is4k]}]
   (when-let [info (:mediaInfo selection)]
-    (when-let [seasons (seq (:seasons info))]
-      (status (dec ((if is4k :status4k :status) (nth seasons (dec season))))))))
+    (status (dec ((if is4k :status4k :status) info)))))
+
+(defn season-status [selection & {:keys [season is4k]}]
+  (when-let [ss (series-status selection :is4k is4k)]
+    (if (= ss :partially-available)
+      (when-let [seasons (seq (:seasons (:mediaInfo selection)))]
+        (status (dec ((if is4k :status4k :status) (nth seasons (dec season))))))
+      ss)))
 
 (defn movie-status [selection & {:keys [is4k]}]
   (when-let [info (:mediaInfo selection)]
