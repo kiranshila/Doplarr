@@ -53,6 +53,8 @@ you copied is correct.
 
 ## Setup
 
+Please read all of this setup carefully. Most problems in deployment come from missing a step.
+
 ### Java
 
 If you are running without Docker, you need to have at least Java 11 installed, such as [adoptium](https://adoptium.net/)
@@ -113,7 +115,7 @@ docker run \
 You need the Clojure CLI tools to build
 
 1. Clone directory
-2. `clj -T:build uberjar`
+2. `clj -T:build uber`
 
 To skip the build, just download `Doplarr.jar` and `config.edn` from the releases
 
