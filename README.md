@@ -51,6 +51,10 @@ use the bot must have the assigned role you created. That _includes_ the server
 owner/admins. Make sure that you assigned the role to yourself and the role ID
 you copied is correct.
 
+### Do you have a support server?
+
+Yes! [here](https://discord.com/channels/890634173751119882/890634174195707965/890641954734485605)
+
 ## Setup
 
 Please read all of this setup carefully. Most problems in deployment come from missing a step.
