@@ -15,9 +15,10 @@
 ## Why does this exist
 
 - Uses modern Discord slash commands and components, which provides a clean, performant UI on desktop and mobile
-- Simple codebase, <1k lines of code which _should_ make it easy to maintain
-- Simple configuration, no need to have a whole web frontend
-- Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly good language 😛
+  - This has the added benifit of not requiring privileged intents, so this bot will *never* look at message content
+- Simple codebase, <1k lines of code which makes it easier to maintain. [Code is not an asset](https://robinbb.com/blog/code-is-not-an-asset/)
+- Simple configuration, no need to have a whole web frontend just for configuration
+- Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly good combination 😛
 
 ### Caveats
 
@@ -52,7 +53,7 @@ use the bot must have the assigned role you created. That _includes_ the server
 owner/admins. Make sure that you assigned the role to yourself and the role ID
 you copied is correct.
 
-### Do you have a support server?
+#### Do you have a support server?
 
 Yes! [here](https://discord.com/channels/890634173751119882/890634174195707965/890641954734485605)
 
