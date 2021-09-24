@@ -30,7 +30,8 @@
   [_ {:keys [id]}]
   (let [guild-id id
         [{command-id :id}] @(discord/register-commands guild-id)]
-    (discord/set-permission guild-id command-id)))
+    (when (:role-id env)
+      (discord/set-permission guild-id command-id))))
 
 (defmethod handle-event :default
   [_ _])

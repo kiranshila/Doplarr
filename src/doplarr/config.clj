@@ -2,8 +2,7 @@
   (:require
    [config.core :refer [env]]))
 
-(def bot-requirements #{:bot-token
-                        :role-id})
+(def bot-requirements #{:bot-token})
 
 (def direct-requirements #{:sonarr-url
                            :sonarr-api

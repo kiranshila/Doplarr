@@ -47,7 +47,7 @@ other managers will be left out until Overseerr supports them.
 
 #### Why are the commands greyed out?
 
-Due to how slash command permissions work in Discord, every user that intends to
+If you are using role-gating, due to how slash command permissions work in Discord, every user that intends to
 use the bot must have the assigned role you created. That _includes_ the server
 owner/admins. Make sure that you assigned the role to yourself and the role ID
 you copied is correct.
@@ -72,8 +72,9 @@ If you are running without Docker, you need to have at least Java 11 installed, 
 4. Go to OAuth2 and under "OAuth2 URL Generator", enable `applications.commands` and `bot`
 5. Copy the resulting URL and use as the invite link to your server
 
-In the server for which you will use the bot, you need to create a new role for
-your users. Then, grab that role id.
+In the server for which you will use the bot, you have the option to restrict
+the commands to a certain role. For this, you need to create a new role for
+your users (or use an existing one). Then, grab that role id.
 
 To do this:
 
@@ -82,6 +83,8 @@ To do this:
 
 Every user that you wish to have access to the slash commands needs to be
 assigned this role (even the server owner/admins).
+
+This is optional and by default the bot will be accessible to everyone on the server.
 
 ### Sonarr/Radarr
 
@@ -111,7 +114,6 @@ docker run \
 -e SONARR_API='sonarr_api' \
 -e RADARR_API='radarr_api' \
 -e BOT_TOKEN='bot_token' \
--e ROLE_ID='role_id' \
 --name doplarr ghcr.io/kiranshila/doplarr:latest
 ```
 
@@ -132,6 +134,9 @@ To skip the build, just download `Doplarr.jar` and `config.edn` from the release
 
 Also, I'm limiting the size of the results in the drop down to 10, this can be
 set with `:max-results` in the config file of `MAX_RESULTS` as an environment variable.
+
+If you are limiting the bot to certain roles, make sure `ROLE_ID` is set as an
+environment variable, or `:role-id` is set in the config file.
 
 ### Setting up on Windows
 

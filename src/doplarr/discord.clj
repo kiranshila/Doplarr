@@ -13,7 +13,7 @@
 (def request-command
   {:name "request"
    :description "Request a series or movie"
-   :default_permission false
+   :default_permission (boolean (not (:role-id env)))
    :options
    [{:type 1
      :name "series"
