@@ -69,7 +69,6 @@
           profiles (->> (a/<! (((profiles-fn @backend) request-type)))
                         (into []))
           selection (a/<! (((process-selection-fn @backend) request-type) (nth results selection-id)))]
-      (println (:seasons selection))
       (case request-type
         :series (if (> (count (:seasons selection)) (case @backend :overseerr 1 :direct 2))
                   (case @backend
