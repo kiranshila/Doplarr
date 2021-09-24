@@ -69,14 +69,19 @@
           profiles (->> (a/<! (((profiles-fn @backend) request-type)))
                         (into []))
           selection (a/<! (((process-selection-fn @backend) request-type) (nth results selection-id)))]
+      (println (:seasons selection))
       (case request-type
-        :series (case @backend
-                  :overseerr (if (a/<! (ovsr/partial-seasons?))
-                               (discord/update-interaction-response token (discord/select-season selection uuid))
-                               (do
-                                 (swap! discord/cache assoc-in [uuid :season] -1)
-                                 (discord/update-interaction-response token (discord/request selection uuid :season -1))))
-                  :direct (discord/update-interaction-response token (discord/select-season selection uuid)))
+        :series (if (> (count (:seasons selection)) (case @backend :overseerr 1 :direct 2))
+                  (case @backend
+                    :overseerr (if (a/<! (ovsr/partial-seasons?))
+                                 (discord/update-interaction-response token (discord/select-season selection uuid))
+                                 (do
+                                   (swap! discord/cache assoc-in [uuid :season] -1)
+                                   (discord/update-interaction-response token (discord/request selection uuid :season -1))))
+                    :direct (discord/update-interaction-response token (discord/select-season selection uuid)))
+                  (do
+                    (swap! discord/cache assoc-in [uuid :season] 1)
+                    (discord/update-interaction-response token (discord/request selection uuid :season -1))))
         :movie  (case @backend
                   :overseerr (discord/update-interaction-response token (discord/request selection uuid))
                   :direct (discord/update-interaction-response token (discord/select-profile profiles uuid))))
