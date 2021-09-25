@@ -15,7 +15,7 @@
 ## Why does this exist
 
 - Uses modern Discord slash commands and components, which provides a clean, performant UI on desktop and mobile
-  - This has the added benifit of not requiring privileged intents, so this bot will *never* look at message content
+  - This has the added benifit of not requiring privileged intents, so this bot will _never_ look at message content
 - Simple codebase, <1k lines of code which makes it easier to maintain. [Code is not an asset](https://robinbb.com/blog/code-is-not-an-asset/)
 - Simple configuration, no need to have a whole web frontend just for configuration
 - Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly good combination 😛
@@ -133,11 +133,11 @@ To skip the build, just download `Doplarr.jar` and `config.edn` from the release
 
 ### Optional Settings
 
-Also, I'm limiting the size of the results in the drop down to 10, this can be
-set with `:max-results` in the config file of `MAX_RESULTS` as an environment variable.
-
-If you are limiting the bot to certain roles, make sure `ROLE_ID` is set as an
-environment variable, or `:role-id` is set in the config file.
+| Environment Variable (Docker) | Config File Keyword | Type    | Description                                                                                      |
+| ----------------------------- | ------------------- | ------- | ------------------------------------------------------------------------------------------------ |
+| `MAX_RESULTS`                 | `:max-results`      | Integer | Sets the maximum size of the search results selection                                            |
+| `ROLE_ID`                     | `:role-id`          | String  | The discord role id for users of the bot (omitting this lets everyone on the server use the bot) |
+| `PARTIAL_SEASONS`             | `:partial-seasons`  | Boolean | Sets whether users can request partial seasons. Defaults to true or setting in Overseer          |
 
 ### Setting up on Windows
 

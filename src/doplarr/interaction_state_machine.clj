@@ -1,6 +1,7 @@
 (ns doplarr.interaction-state-machine
   (:require
    [doplarr.overseerr :as ovsr]
+   [config.core :refer [env]]
    [doplarr.discord :as discord]
    [clojure.core.async :as a]
    [com.rpl.specter :as s]
@@ -70,17 +71,17 @@
                         (into []))
           selection (a/<! (((process-selection-fn @backend) request-type) (nth results selection-id)))]
       (case request-type
-        :series (if (> (count (:seasons selection)) (case @backend :overseerr 1 :direct 2))
-                  (case @backend
-                    :overseerr (if (a/<! (ovsr/partial-seasons?))
-                                 (discord/update-interaction-response token (discord/select-season selection uuid))
-                                 (do
-                                   (swap! discord/cache assoc-in [uuid :season] -1)
-                                   (discord/update-interaction-response token (discord/request selection uuid :season -1))))
-                    :direct (discord/update-interaction-response token (discord/select-season selection uuid)))
-                  (do
-                    (swap! discord/cache assoc-in [uuid :season] 1)
-                    (discord/update-interaction-response token (discord/request selection uuid :season -1))))
+        :series (let [one-season? (> (case @backend :overseerr 1 :direct 2) (count (:seasons selection)))
+                      partial-seasons? (if (nil? (:partial-seasons env))
+                                         (case @backend :overseerr (a/<! (ovsr/partial-seasons?)) :direct true)
+                                         (:partial-seasons env))]
+                  (if (and partial-seasons? (not one-season?))
+                    (discord/update-interaction-response token (discord/select-season selection uuid))
+                    (let [season (if one-season? 1 -1)]
+                      (swap! discord/cache assoc-in [uuid :season] season)
+                      (case @backend
+                        :overseerr (discord/update-interaction-response token (discord/request selection uuid :season season))
+                        :direct (discord/update-interaction-response token (discord/select-profile profiles uuid))))))
         :movie  (case @backend
                   :overseerr (discord/update-interaction-response token (discord/request selection uuid))
                   :direct (discord/update-interaction-response token (discord/select-profile profiles uuid))))
