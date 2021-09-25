@@ -113,7 +113,7 @@
            :mediaId (:id selection)
            :is4k is4k}
     (= "tv" (:mediaType selection)) (assoc :seasons (if (= -1 season)
-                                                      (into [] (range 1 (:seasonCount selection)))
+                                                      (into [] (range 1 (inc (:seasonCount selection))))
                                                       [season]))))
 
 (defn selection-to-embedable [selection]
