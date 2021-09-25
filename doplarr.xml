@@ -55,13 +55,4 @@
   Description="If set to false, force requests of entire series"
   Type="Variable" Display="always-hide" Required="false"
   Mask="false" />
-  <Config Name="PUID" Target="PUID" Default="99" Mode=""
-  Description="Container Variable: PUID" Type="Variable"
-  Display="advanced-hide" Required="false" Mask="false" />
-  <Config Name="PGID" Target="PGID" Default="100" Mode=""
-  Description="Container Variable: PGID" Type="Variable"
-  Display="advanced-hide" Required="false" Mask="false" />
-  <Config Name="UMASK" Target="UMASK" Default="002" Mode=""
-  Description="Container Variable: UMASK" Type="Variable"
-  Display="advanced-hide" Required="false" Mask="false" />
 </Container>
