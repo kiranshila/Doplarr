@@ -6,7 +6,7 @@
    [fmnoise.flow :as flow :refer [then else]]
    [doplarr.arr-utils :as utils]))
 
-(def base-url (delay (str (:sonarr-url env) "/api")))
+(def base-url (delay (str (:sonarr-url env) "/api/v3")))
 (def api-key  (delay (:sonarr-api env)))
 
 (defn rootfolder [] (utils/rootfolder @base-url @api-key))
@@ -40,7 +40,7 @@
 
 (defn quality-profiles []
   (a/go
-    (->> (a/<! (GET "/profile"))
+    (->> (a/<! (GET "/qualityprofile"))
          (then #(->> (:body %)
                      (map utils/quality-profile-data)))
          (else utils/fatal-error))))
