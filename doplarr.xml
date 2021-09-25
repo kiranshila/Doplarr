@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>doplarr</Name>
+  <Repository>ghcr.io/kiranshila/doplarr:latest</Repository>
+  <Registry>
+  https://github.com/kiranshila/doplarr/pkgs/container/doplarr</Registry>
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Support>https://discord.gg/YSga2wxr</Support>
+  <Project>https://github.com/kiranshila/Doplarr/</Project>
+  <Overview>A Better Sonarr/Radarr Request Bot for
+  Discord</Overview>
+  <Shell>bash</Shell>
+  <WebUI />
+  <TemplateURL>
+  https://github.com/kiranshila/Doplarr/raw/main/doplarr.xml</TemplateURL>
+  <Icon>
+  https://github.com/kiranshila/Doplarr/raw/main/logos/logo_cropped.png</Icon>
+  <ExtraParams />
+  <PostArgs />
+  <DonateText />
+  <DonateLink />
+  <Config Name="Discord Bot Token" Target="BOT_TOKEN" Default=""
+  Mode="" Description="Discord bot API token" Type="Variable"
+  Display="always" Required="true" Mask="false" />
+  <Config Name="Radarr URL" Target="RADARR_URL" Default=""
+  Mode="URL of Radarr instance" Description="" Type="Variable"
+  Display="always" Required="false" Mask="false" />
+  <Config Name="Radarr API Key" Target="RADARR_API" Default=""
+  Mode="" Description="API key of Radarr instance" Type="Variable"
+  Display="always" Required="false" Mask="false" />
+  <Config Name="Sonarr URL" Target="SONARR_URL" Default="" Mode=""
+  Description="URL of Sonarr Instance" Type="Variable"
+  Display="always" Required="false" Mask="false" />
+  <Config Name="Sonarr API Key" Target="SONARR_API" Default=""
+  Mode="" Description="API key of Sonarr Instance" Type="Variable"
+  Display="always" Required="false" Mask="false" />
+  <Config Name="Overseerr URL" Target="OVERSEERR_URL" Default=""
+  Mode="" Description="URL of Overseerr instance" Type="Variable"
+  Display="always" Required="false" Mask="false" />
+  <Config Name="Overseerr API Key" Target="OVERSEERR_API"
+  Default="" Mode="" Description="API key of overseerr instance"
+  Type="Variable" Display="always" Required="false" Mask="false" />
+  <Config Name="Discord Role ID" Target="ROLE_ID" Default=""
+  Mode="" Description="Optional role id for restricting bot access"
+  Type="Variable" Display="always-hide" Required="false"
+  Mask="false" />
+  <Config Name="Maximum search results" Target="MAX_RESULTS"
+  Default="10" Mode=""
+  Description="Maximum number of results to show in the search results dropdown"
+  Type="Variable" Display="always-hide" Required="false"
+  Mask="false" />
+  <Config Name="Allow partial seasons?" Target="PARTIAL_SEASONS"
+  Default="true" Mode=""
+  Description="If set to false, force requests of entire series"
+  Type="Variable" Display="always-hide" Required="false"
+  Mask="false" />
+  <Config Name="PUID" Target="PUID" Default="99" Mode=""
+  Description="Container Variable: PUID" Type="Variable"
+  Display="advanced-hide" Required="false" Mask="false" />
+  <Config Name="PGID" Target="PGID" Default="100" Mode=""
+  Description="Container Variable: PGID" Type="Variable"
+  Display="advanced-hide" Required="false" Mask="false" />
+  <Config Name="UMASK" Target="UMASK" Default="002" Mode=""
+  Description="Container Variable: UMASK" Type="Variable"
+  Display="advanced-hide" Required="false" Mask="false" />
+</Container>
