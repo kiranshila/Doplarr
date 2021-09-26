@@ -1,4 +1,4 @@
-(ns doplarr.overseerr
+(ns doplarr.backends.overseerr.impl
   (:require
    [com.rpl.specter :as s]
    [clojure.core.async :as a]

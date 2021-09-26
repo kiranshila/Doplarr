@@ -1,10 +1,10 @@
-(ns doplarr.sonarr
+(ns doplarr.backends.sonarr.impl
   (:require
    [com.rpl.specter :as s]
    [clojure.core.async :as a]
    [config.core :refer [env]]
    [fmnoise.flow :as flow :refer [then else]]
-   [doplarr.arr-utils :as utils]))
+   [doplarr.utils :as utils]))
 
 (def base-url (delay (str (:sonarr-url env) "/api/v3")))
 (def api-key  (delay (:sonarr-api env)))
