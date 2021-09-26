@@ -45,7 +45,7 @@
       (select-keys ["title" "year" "id" "tvdbId" "tmdbId"])
       from-camel))
 
-(defn process-quality-profile [profile]
+(defn process-profile [profile]
   (->> (select-keys profile ["id" "name"])
        from-camel))
 

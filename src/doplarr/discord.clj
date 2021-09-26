@@ -10,9 +10,9 @@
 
 (def channel-timeout 600000)
 
-(def request-command
+(defn request-command []
   {:name "request"
-   :description "Request a series or movie"
+   :description "Request media"
    :default_permission (boolean (not (:role-id env)))
    :options
    [{:type 1
@@ -150,10 +150,13 @@
               (str "result-select:" uuid)
               (map-indexed select-menu-option results))))
 
-(defn select-profile [profiles uuid]
-  (dropdown "Which quality profile?"
-            (str "profile-select:" uuid)
-            (map #(hash-map :label (:name %) :value (:id %)) profiles)))
+(defn option-dropdown [name options uuid]
+  (dropdown (str "Which " name "?")
+            (str "option-select:" uuid)
+            (map #(hash-map :label (:name %) :value (:id %)) options)))
+
+(defn dropdown-result [interaction]
+  (Integer/parseInt (s/select-one [:payload :values 0] interaction)))
 
 (defn selection-embed [selection & {:keys [season profile]}]
   {:title (:title selection)
@@ -182,12 +185,3 @@
   {:content "This has been requested!"
    :embeds [(selection-embed selection :season season :profile profile)]})
 
-(defn select-season [series uuid]
-  (dropdown "Which season?"
-            (str "season-select:" uuid)
-            (conj (map #(hash-map :label (str "Season: " %) :value %)
-                       (range 1 (inc (:seasonCount series))))
-                  {:label "All Seasons" :value "-1"})))
-
-(defn dropdown-index [interaction]
-  (Integer/parseInt (s/select-one [:payload :values 0] interaction)))

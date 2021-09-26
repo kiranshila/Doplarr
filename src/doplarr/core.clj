@@ -52,8 +52,8 @@
 
 (defn -main
   [& _]
-  (when-not (config/validate-env)
-    (println "Error in configuration")
+  (when-let [config-error (config/validate-config)]
+    (ex-info "Error in configuration" {:spec-error config-error})
     (System/exit -1))
   (run)
   (shutdown-agents))

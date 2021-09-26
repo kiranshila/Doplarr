@@ -1,24 +1,15 @@
 (ns doplarr.config
   (:require
-   [config.core :refer [env]]))
+   [config.core :refer [env]]
+   [doplarr.config.specs :as specs]
+   [clojure.spec.alpha :as spec]))
 
-(def bot-requirements #{:bot-token})
+(defn validate-config []
+  (spec/explain-data ::specs/config env))
 
-(def direct-requirements #{:sonarr-url
-                           :sonarr-api
-                           :radarr-url
-                           :radarr-api})
-
-(def overseerr-requirements #{:overseerr-url
-                              :overseerr-api})
-
-;; Default to overseerr if both are configured
-(defn backend []
-  (cond
-    (every? env overseerr-requirements) :overseerr
-    (every? env direct-requirements) :direct
-    :else nil))
-
-(defn validate-env []
-  (and (every? env bot-requirements)
-       (keyword? (backend))))
+(defn available-backends []
+  (let [{:keys [sonarr-url radarr-url overseerr-url]} env]
+    (cond-> #{}
+      sonarr-url (conj :sonarr)
+      radarr-url (conj :radarr)
+      overseerr-url (conj :overseerr))))
