@@ -2,7 +2,11 @@
   (:require
    [config.core :refer [env]]
    [discljord.messaging :as m]
-   [com.rpl.specter :as s]))
+   [com.rpl.specter :as s]
+   [doplarr.utils :as utils]
+   [clojure.spec.alpha :as spec]
+   [doplarr.backends.specs :as bs]
+   [clojure.string :as str]))
 
 (defn request-command [media-types]
   {:name "request"
@@ -61,19 +65,12 @@
     :values (s/select-one [:data :values] interaction)
     :options (into {} (map application-command-interaction-option-data) (get-in interaction [:data :options]))}})
 
-(defn request-button [uuid enabled?]
+(defn request-button [format uuid]
   {:type 2
    :style 1
-   :disabled (not enabled?)
-   :custom_id (str "request:" uuid)
-   :label "Request"})
-
-(defn request-4k-button [uuid enabled?]
-  {:type 2
-   :style 1
-   :disabled (not enabled?)
-   :custom_id (str "request-4k:" uuid)
-   :label "Request 4K"})
+   :disabled false
+   :custom_id (str "request:" uuid ":" format)
+   :label (str/trim (str "Request " format))})
 
 (defn select-menu-option [index result]
   {:label (or (:title result) (:name result))
@@ -94,37 +91,42 @@
               (str "result-select:" uuid)
               (map-indexed select-menu-option results))))
 
-(defn option-dropdown [name options uuid]
-  (dropdown (str "Which " name "?")
-            (str "option-select:" uuid)
+(defn option-dropdown [option options uuid]
+  (dropdown (str "Which " (utils/canonical-option-name option) "?")
+            (str "option-select:" uuid ":" (name option))
             (map #(hash-map :label (:name %) :value (:id %)) options)))
 
 (defn dropdown-result [interaction]
   (Integer/parseInt (s/select-one [:payload :values 0] interaction)))
 
-(defn selection-embed [selection & {:keys [season profile]}]
-  {:title (:title selection)
-   :description (:overview selection)
-   :image {:url (:remotePoster selection)}
-   :thumbnail {:url (request-thumbnail (if season :series :movie))}
+(defn request-embed [{:keys [media-type title overview poster season quality-profile language-profile]}]
+  {:title title
+   :description overview
+   :image {:url poster}
+   :thumbnail {:url (media-type request-thumbnail)}
    :fields (filterv
             identity
-            [(when profile
+            [(when quality-profile
                {:name "Profile"
-                :value profile})
+                :value quality-profile})
+             (when language-profile
+               {:name "Language Profile"
+                :value language-profile})
              (when season
                {:name "Season"
-                :value (if (= season -1)
-                         "All"
-                         season)})])})
+                :value (if (= season -1) "All" season)})])})
 
-(defn request [selection uuid & {:keys [season profile]}]
-  {:content (str "Request this " (if season "series" "movie") " ?")
-   :embeds [(selection-embed selection :season season :profile profile)]
-   :components [{:type 1 :components (filterv identity [(request-button uuid true)
-                                                        (when (:backend-4k selection)
-                                                          (request-4k-button uuid true))])}]})
+(defn request [embed-data uuid]
+  {:content (str "Request this " (name (:media-type embed-data)) " ?")
+   :embeds [(request-embed embed-data)]
+   :components [{:type 1 :components (for [format (:request-formats embed-data)]
+                                       (request-button format uuid))}]})
+(spec/fdef request
+  :args (spec/cat :request-embed ::bs/request-embed
+                  :uuid ::bs/uuid))
 
-(defn request-alert [selection & {:keys [season profile]}]
+(defn request-alert [requestable]
   {:content "This has been requested!"
-   :embeds [(selection-embed selection :season season :profile profile)]})
+   :embeds [(request-embed requestable)]})
+(spec/fdef request
+  :args (spec/cat :requestable ::bs/request-embed))

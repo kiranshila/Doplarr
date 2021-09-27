@@ -22,13 +22,13 @@
 (defn quality-profiles []
   (utils/request-and-process-body
    GET
-   #(into [] (map utils/process-profile %))
+   #(map utils/process-profile %)
    "/qualityProfile"))
 
 (defn language-profiles []
   (utils/request-and-process-body
    GET
-   #(into [] (map utils/process-profile %))
+   #(map utils/process-profile %)
    "/languageProfile"))
 
 (defn get-from-tvdb [tvdb-id]

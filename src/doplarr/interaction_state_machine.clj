@@ -33,30 +33,46 @@
                                         ; Create dropdown for search results
         @(m/edit-original-interaction-response! messaging bot-id token (discord/search-response results uuid))))))
 
-(defmulti process-event! (fn [event _ _ _] event))
-
-(defmethod process-event! "result-select" [_ interaction uuid system]
+(defn query-for-option-or-request [pending-opts system uuid]
   (a/go
     (let [{:doplarr/keys [cache backends]} system
           {:discord/keys [messaging bot-id]} system
-          bot-id @bot-id
-          {:keys [results media-type token]} (get @cache uuid)
+          {:keys [media-type token payload]} (get @cache uuid)
+          bot-id @bot-id]
+      (if (empty? pending-opts)
+        (let [embed (a/<! ((get-in backends [media-type :request-embed]) payload))]
+          @(m/edit-original-interaction-response! messaging bot-id token (discord/request embed uuid)))
+        (let [[op options] (first pending-opts)]
+          @(m/edit-original-interaction-response! messaging bot-id token (discord/option-dropdown op options uuid)))))))
+
+(defmulti process-event! (fn [event _ _ _ _] event))
+
+(defmethod process-event! "result-select" [_ interaction uuid system _]
+  (a/go
+    (let [{:doplarr/keys [cache backends]} system
+          {:keys [results media-type]} (get @cache uuid)
           result (nth results (discord/dropdown-result interaction))
           add-opts (a/<! ((get-in backends [media-type :additional-options]) result))
           pending-opts (->> add-opts
-                            (filter #(vector? (second %)))
+                            (filter #(seq? (second %)))
                             (into {}))
           ready-opts (apply (partial dissoc add-opts) (keys pending-opts))]
                                         ; Start setting up the payload
       (swap! cache assoc-in [uuid :payload] result)
+      (swap! cache assoc-in [uuid :pending-opts] pending-opts)
                                         ; Merge in the opts that are already satisfied
       (swap! cache update-in [uuid :payload] merge ready-opts)
-      (if (empty? pending-opts)
-        nil ; Go to final request screen
-        nil ; Query user for all pending options
-        ))))
+      (query-for-option-or-request pending-opts system uuid))))
+
+(defmethod process-event! "option-select" [_ interaction uuid system option]
+  (let [{:doplarr/keys [cache]} system
+        selection (discord/dropdown-result interaction)
+        cache-val (swap! cache update-in [uuid :pending-opts] #(dissoc % (keyword option)))]
+    (swap! cache assoc-in [uuid :payload (keyword option)] selection)
+    (query-for-option-or-request (get-in cache-val [uuid :pending-opts]) system uuid)))
+
 (defn continue-interaction! [system interaction]
-  (let [[event uuid] (str/split (s/select-one [:payload :component-id] interaction) #":")
+  (let [[event uuid option] (str/split (s/select-one [:payload :component-id] interaction) #":")
         now (System/currentTimeMillis)
         {:keys [token id]} interaction
         {:discord/keys [messaging bot-id]} system
@@ -72,4 +88,4 @@
         ; Move through the state machine to update cache side effecting new components
         (do
           (swap! cache assoc-in [uuid :last-modified] now)
-          (process-event! event interaction uuid system))))))
+          (process-event! event interaction uuid system option))))))

@@ -5,7 +5,8 @@
    [camel-snake-kebab.extras :as cske]
    [clojure.core.async :as a]
    [fmnoise.flow :as flow :refer [then else]]
-   [hato.client :as hc]))
+   [hato.client :as hc]
+   [clojure.string :as str]))
 
 (defn fatal-error [ex]
   (log/fatal ex)
@@ -56,3 +57,9 @@
          (else #(fatal-error (ex-info (str "Error on request from " request-fn)
                                       {:args request-args
                                        :exception (ex-data %)}))))))
+(defn canonical-option-name [option]
+  (-> (name option)
+      (str/replace #"-" " ")
+      (#(if (str/ends-with? % "id")
+          (str/trim (subs % 0 (- (count %) 2)))
+          (str/trim %)))))

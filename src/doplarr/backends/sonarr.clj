@@ -33,9 +33,9 @@
           language-profiles (a/<! (impl/language-profiles))
           details (a/<! (impl/get-from-tvdb (:tvdb-id result)))
           seasons (->> (:seasons details)
-                       (filterv #(pos? (:season-number %)))
-                       (mapv #(let [ssn (:season-number %)]
-                                (hash-map :id ssn :name (str ssn)))))
+                       (filter #(pos? (:season-number %)))
+                       (map #(let [ssn (:season-number %)]
+                               (hash-map :id ssn :name (str ssn)))))
           {:keys [default-language-profile
                   default-quality-profile
                   partial-seasons]} env]
@@ -44,7 +44,7 @@
                                             first
                                             :id)
                  (false? partial-seasons) -1
-                 :else seasons)
+                 :else (conj seasons {:name "All Seasons" :id -1}))
        :quality-profile-id (cond
                              (= 1 (count quality-profiles)) (->> quality-profiles
                                                                  first
@@ -65,3 +65,19 @@
                               :else language-profiles)})))
 (spec/fdef additional-options
   :args (spec/cat :result ::bs/result))
+
+(defn request-embed [{:keys [title quality-profile-id language-profile-id tvdb-id season]}]
+  (a/go
+    (let [quality-profiles (a/<! (impl/quality-profiles))
+          language-profiles (a/<! (impl/language-profiles))
+          details (a/<! (impl/get-from-tvdb tvdb-id))]
+      {:title title
+       :overview (:overview details)
+       :poster (:remote-poster details)
+       :media-type :series
+       :season season
+       :request-formats [""]
+       :quality-profile (:name (first (filter #(= quality-profile-id (:id %)) quality-profiles)))
+       :language-profile (:name (first (filter #(= language-profile-id (:id %)) language-profiles)))})))
+(spec/fdef request-embed
+  :args (spec/cat :payload ::specs/payload))

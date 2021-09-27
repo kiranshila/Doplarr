@@ -4,7 +4,7 @@
    [clojure.core.async :as a]
    [config.core :refer [env]]
    [fmnoise.flow :as flow :refer [then else]]
-   [doplarr.arr-utils :as utils]))
+   [doplarr.utils :as utils]))
 
 (def base-url (delay (str (:overseerr-url env) "/api/v1")))
 (def api-key  (delay (:overseerr-api env)))

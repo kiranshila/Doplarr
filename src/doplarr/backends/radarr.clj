@@ -11,7 +11,7 @@
 (defn search [term]
   (utils/request-and-process-body
    impl/GET
-   #(into [] (map utils/process-search-result %))
+   #(map utils/process-search-result %)
    "/movie/lookup"
    {:query-params {:term term}}))
 (spec/fdef search
@@ -42,3 +42,16 @@
                              :else quality-profiles)})))
 (spec/fdef additional-options
   :args (spec/cat :result ::bs/result))
+
+(defn request-embed [{:keys [title quality-profile-id tmdb-id]}]
+  (a/go
+    (let [quality-profiles (a/<! (impl/quality-profiles))
+          details (a/<! (impl/get-from-tmdb tmdb-id))]
+      {:title title
+       :overview (:overview details)
+       :poster (:remote-poster details)
+       :media-type :movie
+       :request-formats [""]
+       :quality-profile (:name (first (filter #(= quality-profile-id (:id %)) quality-profiles)))})))
+(spec/fdef request-embed
+  :args (spec/cat :payload ::specs/payload))

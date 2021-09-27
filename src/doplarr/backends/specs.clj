@@ -7,8 +7,12 @@
 (spec/def ::id pos-int?)
 (spec/def ::root-folder-path string?)
 (spec/def ::quality-profile-id pos-int?)
+(spec/def ::quality-profile string?)
 (spec/def ::language-profile-id pos-int?)
+(spec/def ::language-profile string?)
 (spec/def ::monitored boolean?)
+(spec/def ::overview string?)
+(spec/def ::poster string?)
 
 ; Movie
 (spec/def ::tmdb-id pos-int?)
@@ -32,3 +36,9 @@
 (spec/def ::option (spec/keys :req-un [::name ::id]))
 (spec/def ::options (spec/coll-of ::option))
 (spec/def ::additional-options (spec/keys :req-un [::name ::options]))
+(spec/def ::uuid string?)
+(spec/def ::request-format string?)
+(spec/def ::request-formats (spec/coll-of ::request-format))
+(spec/def ::media-type keyword?)
+(spec/def ::request-embed (spec/keys :req-un [::title ::overview ::poster ::request-formats ::media-type]
+                                     :opt-un [::quality-pofile ::language-profile ::season]))

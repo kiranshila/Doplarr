@@ -21,8 +21,15 @@
 (defn quality-profiles []
   (utils/request-and-process-body
    GET
-   #(into [] (map utils/process-profile %))
+   #(map utils/process-profile %)
    "/qualityProfile"))
+
+(defn get-from-tmdb [tmdb-id]
+  (utils/request-and-process-body
+   GET
+   (comp utils/from-camel first)
+   "/movie/lookup"
+   {:query-params {:term (str "tmdbId:" tmdb-id)}}))
 
 (defn status [result]
   (cond
@@ -48,4 +55,3 @@
   :args (spec/cat :result ::bs/result
                   :quality-profile-id ::bs/quality-profile-id)
   :ret ::specs/payload)
-

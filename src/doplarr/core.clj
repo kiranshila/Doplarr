@@ -14,7 +14,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;; Backend public interfaces
 (def backends [:radarr :sonarr :overseerr])
-(def backend-fns [:search :request :additional-options])
+(def backend-fns [:search :request :additional-options :request-embed])
 
 (def media-backends {:movie [:overseerr :radarr]
                      :series [:overseerr :sonarr]})
