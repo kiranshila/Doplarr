@@ -19,6 +19,7 @@
 (spec/def ::default-quality-profile string?)
 (spec/def ::default-language-profile string?)
 (spec/def ::role-id string?)
+(spec/def ::max-results pos-int?)
 
 ; Complete Config
 (spec/def ::config (spec/keys :req-un [(or (and ::sonarr-url ::sonarr-api)
@@ -28,4 +29,5 @@
                               :opt-un [::partial-seasons
                                        ::default-quality-profile
                                        ::default-language-profile
-                                       ::role-id]))
+                                       ::role-id
+                                       ::max-results]))

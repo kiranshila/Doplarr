@@ -30,8 +30,7 @@
 (defn additional-options [result]
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
-          {:keys [default-quality-profile
-                  partial-seasons]} env]
+          {:keys [default-quality-profile]} env]
       {:quality-profile-id (cond
                              (= 1 (count quality-profiles)) (->> quality-profiles
                                                                  first

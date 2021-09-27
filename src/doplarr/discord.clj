@@ -2,35 +2,21 @@
   (:require
    [config.core :refer [env]]
    [discljord.messaging :as m]
-   [clojure.core.cache.wrapped :as cache]
    [com.rpl.specter :as s]))
 
-(defonce state (atom nil))
-(defonce cache (cache/ttl-cache-factory {} :ttl 900000)) ; 15 Minute cache expiration, coinciding with the interaction token
-
-(def channel-timeout 600000)
-
-(defn request-command []
+(defn request-command [media-types]
   {:name "request"
    :description "Request media"
    :default_permission (boolean (not (:role-id env)))
    :options
-   [{:type 1
-     :name "series"
-     :description "Request a series"
-     :options
-     [{:type 3
-       :name "term"
-       :description "Search term"
-       :required true}]}
-    {:type 1
-     :name "movie"
-     :description "Request a movie",
-     :options
-     [{:type 3
-       :name "term"
-       :description "Search term"
-       :required true}]}]})
+   (into [] (for [media media-types]
+              {:type 1
+               :name media
+               :description (str "Request " media)
+               :options [{:type 3
+                          :name "query"
+                          :description "Query"
+                          :required true}]}))})
 
 (defn content-response [content]
   {:content content
@@ -44,62 +30,20 @@
                       2 :button
                       3 :select-menu})
 
-(def max-results (delay (:max-results env 10)))
-
 (def request-thumbnail
   {:series "https://thetvdb.com/images/logo.png"
    :movie "https://i.imgur.com/44ueTES.png"})
 
 ;; Discljord setup
-(defn register-commands [guild-id]
+(defn register-commands [media-types bot-id messaging guild-id]
   (m/bulk-overwrite-guild-application-commands!
-   (:messaging @state)
-   (:id @state)
-   guild-id
-   [request-command]))
+   messaging bot-id guild-id
+   [(request-command media-types)]))
 
-(defn set-permission [guild-id command-id]
+(defn set-permission [bot-id messaging guild-id command-id]
   (m/edit-application-command-permissions!
-   (:messaging @state)
-   (:id @state)
-   guild-id
-   command-id
-   [{:id (:role-id env)
-     :type 1
-     :permission true}]))
-
-(defn interaction-response [interaction-id interaction-token type & {:keys [ephemeral? content components embeds]}]
-  (m/create-interaction-response!
-   (:messaging @state)
-   interaction-id
-   interaction-token
-   type
-   :data
-   (cond-> {}
-     ephemeral? (assoc :flags 64)
-     content (assoc :content content)
-     components (assoc :components components)
-     embeds (assoc :embeds embeds))))
-
-(defn followup-repsonse [interaction-token & {:keys [ephermeral? content components embeds]}]
-  (m/create-followup-message!
-   (:messaging @state)
-   (:id @state)
-   interaction-token
-   (cond-> {}
-     ephermeral? (assoc :flags 64)
-     content (assoc :content content)
-     components (assoc :components components)
-     embeds (assoc :embeds embeds))))
-
-(defn update-interaction-response [interaction-token & {:keys [content components embeds]}]
-  (m/edit-original-interaction-response!
-   (:messaging @state)
-   (:id @state)
-   interaction-token
-   :content content
-   :components components
-   :embeds embeds))
+   messaging bot-id guild-id command-id
+   [{:id (:role-id env) :type 1 :permission true}]))
 
 (defn application-command-interaction-option-data [app-com-int-opt]
   [(keyword (:name app-com-int-opt))
@@ -184,4 +128,3 @@
 (defn request-alert [selection & {:keys [season profile]}]
   {:content "This has been requested!"
    :embeds [(selection-embed selection :season season :profile profile)]})
-
