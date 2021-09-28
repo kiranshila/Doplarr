@@ -16,6 +16,7 @@
 
 ; Movie
 (spec/def ::tmdb-id pos-int?)
+(spec/def ::search-for-movie boolean?)
 
 ; Series
 (spec/def ::season-number int?)
@@ -24,14 +25,14 @@
 (spec/def ::tvdb-id pos-int?)
 (spec/def ::ignore-episodes-with-files boolean?)
 (spec/def ::search-for-missing-episodes boolean?)
-(spec/def ::add-options (spec/keys :req-un [::ignore-episodes-with-files ::search-for-missing-episodes]))
 
 ; Searching
 (spec/def ::result (spec/keys :req-un [::title ::year
                                        (or ::id ::tvdb-id ::tmdb-id)]))
 
 ; Doplarr Internals
-(spec/def ::status #{:unknown :pending :processing :partially-available :available})
+(spec/def ::status (or #{:unauthorized :unknown :pending :processing :partially-available :available}
+                       nil?))
 (spec/def ::name string?)
 (spec/def ::option (spec/keys :req-un [::name ::id]))
 (spec/def ::options (spec/coll-of ::option))

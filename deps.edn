@@ -11,6 +11,7 @@
         fmnoise/flow {:mvn/version "4.1.0"}
         hato/hato {:mvn/version "0.8.2"}
         integrant/integrant {:mvn/version "0.8.0"}
+        orchestra/orchestra {:mvn/version "2021.01.01-1"}
         camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.2"}
         org.clojure/alpha.spec {:git/url "https://github.com/clojure/spec-alpha2.git"
                                 :sha "c087ded910b3532a938b37e853df79fc3b9c48c1"}}

@@ -1,10 +1,10 @@
 (ns doplarr.backends.radarr.impl
   (:require
+   [orchestra.core :refer [defn-spec]]
    [config.core :refer [env]]
    [doplarr.utils :as utils]
    [doplarr.backends.radarr.specs :as specs]
    [clojure.core.async :as a]
-   [clojure.spec.alpha :as spec]
    [doplarr.backends.specs :as bs]))
 
 (def base-url (delay (str (:radarr-url env) "/api/v3")))
@@ -31,27 +31,21 @@
    "/movie/lookup"
    {:query-params {:term (str "tmdbId:" tmdb-id)}}))
 
-(defn status [result]
+(defn-spec status ::bs/status
+  [details ::specs/details]
   (cond
-    (and (:has-file result)
-         (:is-available result)
-         (:monitored result)) :available
-    (and (not (:has-file result))
-         (:is-available result)
-         (:monitored result)) :processing
+    (and (:has-file details)
+         (:is-available details)
+         (:monitored details)) :available
+    (and (not (:has-file details))
+         (:is-available details)
+         (:monitored details)) :processing
     :else nil))
-(spec/fdef status
-  :args (spec/cat :result ::bs/result)
-  :ret ::bs/status)
 
-(defn request-payload [result quality-profile-id]
-  (-> result
-      (select-keys [:title :tmdb-id])
-      (assoc :quality-profile-id quality-profile-id
-             :monitored true
+(defn-spec request-payload ::specs/request-payload
+  [payload ::specs/prepared-payload]
+  (-> payload
+      (select-keys [:title :tmdb-id :quality-profile-id])
+      (assoc :monitored true
              :root-folder-path @rootfolder
              :add-options {:search-for-movie true})))
-(spec/fdef request-payload
-  :args (spec/cat :result ::bs/result
-                  :quality-profile-id ::bs/quality-profile-id)
-  :ret ::specs/payload)

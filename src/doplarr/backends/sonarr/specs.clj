@@ -11,3 +11,4 @@
                                         ::bs/quality-profile-id
                                         ::bs/language-profile-id]
                                :opt-un [::bs/id]))
+(spec/def ::add-options (spec/keys :req-un [::ignore-episodes-with-files ::search-for-missing-episodes]))

@@ -4,6 +4,7 @@
    [doplarr.discord :as discord]
    [clojure.core.async :as a]
    [com.rpl.specter :as s]
+   [fmnoise.flow :refer [then else]]
    [discljord.messaging :as m]
    [clojure.string :as str]))
 
@@ -70,6 +71,25 @@
         cache-val (swap! cache update-in [uuid :pending-opts] #(dissoc % (keyword option)))]
     (swap! cache assoc-in [uuid :payload (keyword option)] selection)
     (query-for-option-or-request (get-in cache-val [uuid :pending-opts]) system uuid)))
+
+(defmethod process-event! "request" [_ _ uuid system format]
+  (let [{:discord/keys [messaging bot-id]} system
+        bot-id @bot-id
+        {:doplarr/keys [cache backends]} system
+        {:keys [payload media-type token]} (get @cache uuid)]
+    (letfn [(error-resp [msg] @(m/edit-original-interaction-response! messaging bot-id token (discord/content-response msg)))]
+      (->>  (a/<!! ((get-in backends [media-type :request]) (assoc payload :format (keyword format))))
+            (then #(case %
+                     :unauthorized (error-resp "You do not have an associated account in the request backend")
+                     :pending (error-resp "This has already been requested and the request is pending")
+                     :processing (error-resp "This is currently processing and should be available soon!")
+                     :available (error-resp "This selection is already available!")))
+            (else (fn [e]
+                    (let [{:keys [status body] :as data} (ex-data e)
+                          msg (body "message")]
+                      (if (= status 403)
+                        @(m/edit-original-interaction-response! messaging bot-id token (discord/content-response msg))
+                        (throw (ex-info "Non 403 error on request" data))))))))))
 
 (defn continue-interaction! [system interaction]
   (let [[event uuid option] (str/split (s/select-one [:payload :component-id] interaction) #":")
