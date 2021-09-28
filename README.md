@@ -118,6 +118,20 @@ docker run \
 --name doplarr ghcr.io/kiranshila/doplarr:latest
 ```
 
+Alternatively, use docker-compose:
+
+```
+doplarr:
+    environment:
+        - ‘SONARR_URL=http://localhost:8989’
+        - ‘RADARR_URL=http://localhost:7878’
+        - SONARR_API=sonarr_api
+        - RADARR_API=radarr_api
+        - BOT_TOKEN=bot_token
+    container_name: doplarr
+    image: ‘ghcr.io/kiranshila/doplarr:latest’
+```
+
 ## Building and Running Locally
 
 You need the Clojure CLI tools to build
