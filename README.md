@@ -120,7 +120,7 @@ docker run \
 
 Alternatively, use docker-compose:
 
-```
+```yaml
 doplarr:
     environment:
         - ‘SONARR_URL=http://localhost:8989’
