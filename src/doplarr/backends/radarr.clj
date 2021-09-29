@@ -2,6 +2,7 @@
   (:require
    [orchestra.core :refer [defn-spec]]
    [config.core :refer [env]]
+   [fmnoise.flow :refer [then]]
    [doplarr.utils :as utils]
    [doplarr.backends.radarr.impl :as impl]
    [doplarr.backends.radarr.specs :as specs]
@@ -23,17 +24,12 @@
   ; Send request and response and nil (non-exceptional)
   ; Or send status
   (a/go
-    (let [details (a/<! (impl/get-from-tmdb (:tmdb-id payload)))
-          status (impl/status details)
-          request-payload (impl/request-payload payload)]
+    (let [status (impl/status (a/<! (impl/get-from-tmdb (:tmdb-id payload))))]
       (if status
         status
-        (a/<! (utils/request-and-process-body
-               impl/POST
-               (constantly nil)
-               "/movie"
-               {:form-params (utils/to-camel payload)
-                :content-type :json}))))))
+        (->> (a/<! (impl/POST "/movie" {:form-params (utils/to-camel (impl/request-payload payload))
+                                        :content-type :json}))
+             (then (constantly nil)))))))
 
 (defn-spec additional-options any?
   [result ::bs/result]

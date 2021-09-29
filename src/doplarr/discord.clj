@@ -24,6 +24,7 @@
 
 (defn content-response [content]
   {:content content
+   :embeds []
    :components []})
 
 (def interaction-types {1 :ping

@@ -3,8 +3,8 @@
    [orchestra.core :refer [defn-spec]]
    [config.core :refer [env]]
    [doplarr.utils :as utils]
+   [fmnoise.flow :refer [then]]
    [doplarr.backends.sonarr.impl :as impl]
-   [clojure.spec.alpha :as spec]
    [doplarr.backends.sonarr.specs :as specs]
    [doplarr.backends.specs :as bs]
    [clojure.core.async :as a]))
@@ -18,13 +18,21 @@
    {:query-params {:term term}}))
 
 (defn-spec request any?
-  [payload ::specs/payload]
-  (utils/request-and-process-body
-   (if (:id payload) impl/PUT impl/POST)
-   (constantly nil)
-   "/series"
-   {:form-params (utils/to-camel payload)
-    :content-type :json}))
+  [payload ::specs/prepared-payload]
+  (let [details  (a/<!! (if-let [id (:id payload)]
+                          (impl/get-from-id id)
+                          (impl/get-from-tvdb (:tvdb-id payload))))
+        status (impl/status details (:season payload))
+        request-payload (impl/request-payload payload details)]
+    (if status
+      status
+      (->> (a/<!! ((if (:id payload) impl/PUT impl/POST) "/series" {:form-params (utils/to-camel request-payload)
+                                                                    :content-type :json}))
+           (then (fn [_]
+                   (when-let [id (:id payload)]
+                     (if (= -1 (:season payload))
+                       (impl/search-series id)
+                       (impl/search-season id (:season payload))))))))))
 
 (defn-spec additional-options
   ::bs/additional-options
@@ -66,7 +74,7 @@
                               :else language-profiles)})))
 
 (defn-spec request-embed ::bs/request-embed
-  [{:keys [title quality-profile-id language-profile-id tvdb-id season]} ::specs/payload]
+  [{:keys [title quality-profile-id language-profile-id tvdb-id season]} ::specs/prepared-payload]
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
           language-profiles (a/<! (impl/language-profiles))
