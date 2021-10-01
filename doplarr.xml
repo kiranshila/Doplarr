@@ -24,7 +24,7 @@
   Mode="" Description="Discord bot API token" Type="Variable"
   Display="always" Required="true" Mask="false" />
   <Config Name="Radarr URL" Target="RADARR_URL" Default=""
-  Mode="URL of Radarr instance" Description="" Type="Variable"
+  Mode="" Description="URL of Radarr instance" Type="Variable"
   Display="always" Required="false" Mask="false" />
   <Config Name="Radarr API Key" Target="RADARR_API" Default=""
   Mode="" Description="API key of Radarr instance" Type="Variable"
