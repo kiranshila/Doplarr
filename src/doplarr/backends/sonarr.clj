@@ -19,20 +19,20 @@
 
 (defn-spec request any?
   [payload ::specs/prepared-payload]
-  (let [details  (a/<!! (if-let [id (:id payload)]
-                          (impl/get-from-id id)
-                          (impl/get-from-tvdb (:tvdb-id payload))))
-        status (impl/status details (:season payload))
-        request-payload (impl/request-payload payload details)]
-    (if status
-      status
-      (->> (a/<!! ((if (:id payload) impl/PUT impl/POST) "/series" {:form-params (utils/to-camel request-payload)
-                                                                    :content-type :json}))
-           (then (fn [_]
-                   (when-let [id (:id payload)]
-                     (if (= -1 (:season payload))
-                       (impl/search-series id)
-                       (impl/search-season id (:season payload))))))))))
+  (a/go (let [details  (a/<! (if-let [id (:id payload)]
+                               (impl/get-from-id id)
+                               (impl/get-from-tvdb (:tvdb-id payload))))
+              status (impl/status details (:season payload))
+              request-payload (impl/request-payload payload details)]
+          (if status
+            status
+            (->> (a/<! ((if (:id payload) impl/PUT impl/POST) "/series" {:form-params (utils/to-camel request-payload)
+                                                                         :content-type :json}))
+                 (then (fn [_]
+                         (when-let [id (:id payload)]
+                           (if (= -1 (:season payload))
+                             (impl/search-series id)
+                             (impl/search-season id (:season payload)))))))))))
 
 (defn-spec additional-options
   ::bs/additional-options

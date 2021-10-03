@@ -107,7 +107,8 @@
     (let [{:keys [token last-modified]} (get @cache uuid)]
       (if (> (- now last-modified) channel-timeout)
         ; Update interaction with timeout message
-        @(m/edit-original-interaction-response! messaging bot-id token (discord/content-response "Request timed out, please try again"))
+        @(-> messaging
+             (m/edit-original-interaction-response! bot-id token (discord/content-response "Request timed out, please try again")))
         ; Move through the state machine to update cache side effecting new components
         (do
           (swap! cache assoc-in [uuid :last-modified] now)

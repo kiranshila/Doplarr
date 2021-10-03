@@ -99,10 +99,17 @@
 
 (defn-spec request-payload ::specs/request-payload
   [payload ::specs/prepared-payload details any?]
-  (assoc payload
-         :monitored true
-         :seasons (-> (generate-request-seasons details (:season payload))
-                      (generate-seasons (count (:seasons details))))
-         :root-folder-path @rootfolder
-         :add-options {:ignore-episodes-with-files true
-                       :search-for-missing-episodes true}))
+  (let [seasons (-> (generate-request-seasons details (:season payload))
+                    (generate-seasons (count (:seasons details))))]
+    (if (:id payload)
+      (assoc details
+             :seasons seasons
+             :quality-profile-id (:quality-profile-id payload))
+      (-> payload
+          (assoc :monitored true
+                 :seasons seasons
+                 :root-folder-path @rootfolder
+                 :add-options {:ignore-episodes-with-files true
+                               :search-for-missing-episodes true})
+          (dissoc :season
+                  :format)))))
