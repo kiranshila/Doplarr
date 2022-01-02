@@ -46,7 +46,7 @@
                        (map #(let [ssn (:season-number %)]
                                (hash-map :id ssn :name (str ssn)))))
           {:keys [default-language-profile
-                  default-quality-profile
+                  default-sonarr-quality-profile
                   partial-seasons]} env]
       {:season (cond
                  (= 1 (count seasons)) (->> seasons
@@ -58,10 +58,10 @@
                              (= 1 (count quality-profiles)) (->> quality-profiles
                                                                  first
                                                                  :id)
-                             default-quality-profile (->> quality-profiles
-                                                          (filter #(= default-quality-profile (:name %)))
-                                                          first
-                                                          :id)
+                             default-sonarr-quality-profile (->> quality-profiles
+                                                                 (filter #(= default-sonarr-quality-profile (:name %)))
+                                                                 first
+                                                                 :id)
                              :else quality-profiles)
        :language-profile-id (cond
                               (= 1 (count language-profiles)) (->> language-profiles

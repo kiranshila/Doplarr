@@ -15,8 +15,8 @@
    :options
    (into [] (for [media media-types]
               {:type 1
-               :name media
-               :description (str "Request " media)
+               :name (name media)
+               :description (str "Request " (name media))
                :options [{:type 3
                           :name "query"
                           :description "Query"
@@ -75,7 +75,7 @@
 
 (defn select-menu-option [index result]
   {:label (or (:title result) (:name result))
-   :description (:year result)
+   :description (or (:year result) (:author result))
    :value index})
 
 (defn dropdown [content id options]

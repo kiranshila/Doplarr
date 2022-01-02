@@ -26,9 +26,14 @@
 (spec/def ::ignore-episodes-with-files boolean?)
 (spec/def ::search-for-missing-episodes boolean?)
 
+; Books
+(spec/def ::foreign-book-id pos-int?)
+(spec/def ::author string?)
+
 ; Searching
-(spec/def ::result (spec/keys :req-un [::title ::year
-                                       (or ::id ::tvdb-id ::tmdb-id)]))
+(spec/def ::result (spec/keys :req-un [::title
+                                       (or ::year ::author)
+                                       (or ::id ::tvdb-id ::tmdb-id ::foreign-book-id)]))
 
 ; Doplarr Internals
 (spec/def ::status (or #{:unauthorized :unknown :pending :processing :partially-available :available}

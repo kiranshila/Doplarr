@@ -8,8 +8,9 @@
   (spec/explain-data ::specs/config env))
 
 (defn available-backends []
-  (let [{:keys [sonarr-url radarr-url overseerr-url]} env]
+  (let [{:keys [sonarr-url radarr-url overseerr-url readarr-url]} env]
     (cond-> #{}
+      readarr-url (conj :readarr)
       sonarr-url (conj :sonarr)
       radarr-url (conj :radarr)
       overseerr-url (conj :overseerr))))

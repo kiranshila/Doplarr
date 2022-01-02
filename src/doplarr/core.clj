@@ -13,11 +13,12 @@
   (:gen-class))
 
 ;;;;;;;;;;;;;;;;;;;;;;;; Backend public interfaces
-(def backends [:radarr :sonarr :overseerr])
+(def backends [:radarr :sonarr :overseerr :readarr])
 (def backend-fns [:search :request :additional-options :request-embed])
 
 (def media-backends {:movie [:overseerr :radarr]
-                     :series [:overseerr :sonarr]})
+                     :series [:overseerr :sonarr]
+                     :book [:readarr]})
 
 (defn derive-backend! [backend]
   (derive (keyword "backend" (name backend)) :doplarr/backend))

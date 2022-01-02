@@ -35,15 +35,15 @@
   [result ::bs/result]
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
-          {:keys [default-quality-profile]} env]
+          {:keys [default-radarr-quality-profile]} env]
       {:quality-profile-id (cond
                              (= 1 (count quality-profiles)) (->> quality-profiles
                                                                  first
                                                                  :id)
-                             default-quality-profile (->> quality-profiles
-                                                          (filter #(= default-quality-profile (:name %)))
-                                                          first
-                                                          :id)
+                             default-radarr-quality-profile (->> quality-profiles
+                                                                 (filter #(= default-radarr-quality-profile (:name %)))
+                                                                 first
+                                                                 :id)
                              :else quality-profiles)})))
 
 (defn-spec request-embed any?
