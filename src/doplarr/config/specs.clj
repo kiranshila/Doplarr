@@ -1,42 +1,43 @@
 (ns doplarr.config.specs
-  (:require [clojure.spec.alpha :as spec]))
+  (:require [clojure.spec.alpha :as spec]
+            [clojure.string :as str]))
+
+(spec/def ::valid-url (spec/and string?
+                                (complement #(str/ends-with? % "/"))))
 
 ; Backend endpoints
-(spec/def ::sonarr-url string?)
-(spec/def ::radarr-url string?)
-(spec/def ::overseerr-url string?)
-(spec/def ::readarr-url string?)
+(spec/def :sonarr/url ::valid-url)
+(spec/def :radarr/url ::valid-url)
 
 ; Backend API keys
-(spec/def ::sonarr-api string?)
-(spec/def ::radarr-api string?)
-(spec/def ::overseerr-api string?)
-(spec/def ::readarr-api string?)
+(spec/def :sonarr/api string?)
+(spec/def :radarr/api string?)
 
 ; Discord bot token
-(spec/def ::bot-token string?)
-
-; Additional required keys
-(spec/def ::readarr-quality-profile string?)
-(spec/def ::readarr-metadata-profile string?)
+(spec/def :discord/token string?)
 
 ; Optional settings
-(spec/def ::partial-seasons boolean?)
-(spec/def ::default-radarr-quality-profile string?)
-(spec/def ::default-sonarr-quality-profile string?)
-(spec/def ::default-language-profile string?)
-(spec/def ::role-id string?)
-(spec/def ::max-results pos-int?)
+(spec/def :discord/role-id string?)
+(spec/def :discord/max-results pos-int?)
 
-; Complete Config
-(spec/def ::config (spec/keys :req-un [(or (and ::sonarr-url ::sonarr-api)
-                                           (and ::radarr-url ::radarr-api)
-                                           (and ::overseerr-url ::overseerr-api)
-                                           (and ::readarr-url ::readarr-api ::readarr-quality-profile ::readarr-metadata-profile))
-                                       ::bot-token]
-                              :opt-un [::partial-seasons
-                                       ::default-radarr-quality-profile
-                                       ::default-sonarr-quality-profile
-                                       ::default-language-profile
-                                       ::role-id
-                                       ::max-results]))
+(spec/def :radarr/quality-profile string?)
+
+(defn when-req [pred spec]
+  (spec/nonconforming
+   (spec/or :passed (spec/and pred spec)
+            :failed (complement (partial spec/valid? pred)))))
+
+(defmacro matched-keys
+  [& ks]
+  `(when-req #(some (partial contains? %) ~(vec ks)) (spec/keys :req ~(vec ks))))
+
+; Complete configuration
+(spec/def ::config (spec/and
+                    (spec/keys :req [:discord/token]
+                               :opt [:discord/role-id
+                                     :discord/max-results
+                                     :radarr/quality-profile])
+                    #(some (partial contains? %) [:sonarr/url
+                                                  :radarr/url])
+                    (matched-keys :sonarr/url :sonarr/api)
+                    (matched-keys :radarr/url :radarr/api)))

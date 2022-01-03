@@ -1,53 +1,33 @@
 (ns doplarr.backends.radarr
   (:require
-   [orchestra.core :refer [defn-spec]]
+   [taoensso.timbre :refer [warn]]
    [config.core :refer [env]]
    [fmnoise.flow :refer [then]]
    [doplarr.utils :as utils]
    [doplarr.backends.radarr.impl :as impl]
-   [doplarr.backends.radarr.specs :as specs]
-   [doplarr.backends.specs :as bs]
    [clojure.core.async :as a]))
 
-(defn-spec search any?
-  [term string?]
+(defn search [term]
   (utils/request-and-process-body
    impl/GET
    #(map utils/process-search-result %)
    "/movie/lookup"
    {:query-params {:term term}}))
 
-(defn-spec request any?
-  [payload ::specs/prepared-payload]
-  ; Use collected information to finalize request payload
-  ; Check status to see if we *can* request
-  ; Send request and response and nil (non-exceptional)
-  ; Or send status
-  (a/go
-    (let [status (impl/status (a/<! (impl/get-from-tmdb (:tmdb-id payload))))]
-      (if status
-        status
-        (->> (a/<! (impl/POST "/movie" {:form-params (utils/to-camel (impl/request-payload payload))
-                                        :content-type :json}))
-             (then (constantly nil)))))))
-
-(defn-spec additional-options any?
-  [result ::bs/result]
+(defn additional-options [_]
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
-          {:keys [default-radarr-quality-profile]} env]
-      {:quality-profile-id (cond
-                             (= 1 (count quality-profiles)) (->> quality-profiles
-                                                                 first
-                                                                 :id)
-                             default-radarr-quality-profile (->> quality-profiles
-                                                                 (filter #(= default-radarr-quality-profile (:name %)))
-                                                                 first
-                                                                 :id)
-                             :else quality-profiles)})))
+          {:keys [radarr/quality-profile]} env
+          default-profile-id (utils/profile-name-id quality-profiles quality-profile)]
+      (when (and quality-profile (nil? default-profile-id))
+        (warn "Default quality profile in config doesn't exist in backend, check spelling"))
+      {:quality-profile-id
+       (cond
+         default-profile-id             default-profile-id
+         (= 1 (count quality-profiles)) (:id (first quality-profiles))
+         :else quality-profiles)})))
 
-(defn-spec request-embed any?
-  [{:keys [title quality-profile-id tmdb-id]} ::specs/prepared-payload]
+(defn request-embed [{:keys [title quality-profile-id tmdb-id]}]
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
           details (a/<! (impl/get-from-tmdb tmdb-id))]
@@ -56,4 +36,13 @@
        :poster (:remote-poster details)
        :media-type :movie
        :request-formats [""]
-       :quality-profile (:name (first (filter #(= quality-profile-id (:id %)) quality-profiles)))})))
+       :quality-profile (utils/profile-id-name quality-profiles quality-profile-id)})))
+
+(defn request [payload]
+  (a/go
+    (let [status (impl/status (a/<! (impl/get-from-tmdb (:tmdb-id payload))))]
+      (if status
+        status
+        (->> (a/<! (impl/POST "/movie" {:form-params (utils/to-camel (impl/request-payload payload))
+                                        :content-type :json}))
+             (then (constantly nil)))))))

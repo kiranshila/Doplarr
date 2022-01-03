@@ -1,12 +1,12 @@
 (ns doplarr.discord
   (:require
    [config.core :refer [env]]
-   [discljord.messaging :as m]
    [com.rpl.specter :as s]
+   [clojure.string :as str]
+   [taoensso.timbre :refer [fatal]]
    [doplarr.utils :as utils]
-   [clojure.spec.alpha :as spec]
-   [doplarr.backends.specs :as bs]
-   [clojure.string :as str]))
+   [fmnoise.flow :as flow :refer [else]]
+   [discljord.messaging :as m]))
 
 (defn request-command [media-types]
   {:name "request"
@@ -39,17 +39,6 @@
   {:series "https://thetvdb.com/images/logo.png"
    :movie "https://i.imgur.com/44ueTES.png"})
 
-;; Discljord setup
-(defn register-commands [media-types bot-id messaging guild-id]
-  (m/bulk-overwrite-guild-application-commands!
-   messaging bot-id guild-id
-   [(request-command media-types)]))
-
-(defn set-permission [bot-id messaging guild-id command-id]
-  (m/edit-application-command-permissions!
-   messaging bot-id guild-id command-id
-   [{:id (:role-id env) :type 1 :permission true}]))
-
 (defn application-command-interaction-option-data [app-com-int-opt]
   [(keyword (:name app-com-int-opt))
    (into {} (map (juxt (comp keyword :name) :value)) (:options app-com-int-opt))])
@@ -75,7 +64,7 @@
 
 (defn select-menu-option [index result]
   {:label (or (:title result) (:name result))
-   :description (or (:year result) (:author result))
+   :description (:year result)
    :value index})
 
 (defn dropdown [content id options]
@@ -122,12 +111,20 @@
    :embeds [(request-embed embed-data)]
    :components [{:type 1 :components (for [format (:request-formats embed-data)]
                                        (request-button format uuid))}]})
-(spec/fdef request
-  :args (spec/cat :request-embed ::bs/request-embed
-                  :uuid ::bs/uuid))
 
 (defn request-alert [requestable]
   {:content "This has been requested!"
    :embeds [(request-embed requestable)]})
-(spec/fdef request
-  :args (spec/cat :requestable ::bs/request-embed))
+
+;; Discljord Utilities
+(defn register-commands [media-types bot-id messaging guild-id]
+  (->> @(m/bulk-overwrite-guild-application-commands!
+         messaging bot-id guild-id
+         [(request-command media-types)])
+       (else #(fatal % "Error in registering commands"))))
+
+(defn set-permission [bot-id messaging guild-id command-id]
+  (->> @(m/edit-application-command-permissions!
+         messaging bot-id guild-id command-id
+         [{:id (:role-id env) :type 1 :permission true}])
+       (else #(fatal % "Error in setting command permissions"))))

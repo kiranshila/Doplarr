@@ -1,113 +1,74 @@
 (ns doplarr.core
   (:require
-   [clojure.core.cache.wrapped :as cache]
-   [integrant.core :as ig]
-   [doplarr.config :as config]
-   [doplarr.interaction-state-machine :as ism]
-   [discljord.messaging :as m]
+   [taoensso.timbre :refer [info fatal debug]]
+   [taoensso.timbre.tools.logging :as tlog]
    [discljord.connections :as c]
+   [discljord.messaging :as m]
    [discljord.events :as e]
    [config.core :refer [env]]
-   [clojure.core.async :as a]
-   [doplarr.discord :as discord])
+   [doplarr.config :as config]
+   [doplarr.state :as state]
+   [doplarr.interaction-state-machine :as ism]
+   [doplarr.discord :as discord]
+   [clojure.core.async :as a])
   (:gen-class))
 
-;;;;;;;;;;;;;;;;;;;;;;;; Backend public interfaces
-(def backends [:radarr :sonarr :overseerr :readarr])
-(def backend-fns [:search :request :additional-options :request-embed])
+; Pipe tools.logging to timbre
+(tlog/use-timbre)
 
-(def media-backends {:movie [:overseerr :radarr]
-                     :series [:overseerr :sonarr]
-                     :book [:readarr]})
-
-(defn derive-backend! [backend]
-  (derive (keyword "backend" (name backend)) :doplarr/backend))
-
-; Generate Parent-Child Relationships
-(run! derive-backend! backends)
-
-; System configuration
-(def config
-  (-> (into {} (for [b backends]
-                 [(keyword "backend" (name b)) {:ns b}]))
-      (assoc :doplarr/backends
-             (into {} (for [[media backends] media-backends
-                            :let [backend (first (keep (config/available-backends) backends))]]
-                        [media (ig/ref (keyword "backend" (name backend)))]))
-             :doplarr/cache {:ttl 900000}
-             :discord/events {:size 100}
-             :discord/bot-id (promise)
-             :discord/gateway {:event (ig/ref :discord/events)}
-             :discord/messaging nil)))
-
-(defmethod ig/init-key :doplarr/backend [_ {:keys [ns]}]
-  (zipmap backend-fns (for [f backend-fns
-                            :let [ns (str "doplarr.backends." (name ns))
-                                  sym (symbol ns (name f))]]
-                        (requiring-resolve sym))))
-
-(defmethod ig/init-key :doplarr/backends [_ m]
-  m)
-
-(defmethod ig/init-key :doplarr/cache [_ {:keys [ttl]}]
-  (cache/ttl-cache-factory {} :ttl ttl))
-
-(defmethod ig/init-key :discord/bot-id [_ p]
-  p)
-
-(defmethod ig/init-key :discord/events [_ {:keys [size]}]
-  (a/chan size))
-
-(defmethod ig/init-key :discord/gateway [_ {:keys [event]}]
-  (c/connect-bot! (:bot-token env) event :intents #{:guilds}))
-
-(defmethod ig/init-key :discord/messaging [_ _]
-  (m/start-connection! (:bot-token env)))
-
-(defmethod ig/halt-key! :discord/events [_ chan]
-  (a/close! chan))
-
-(defmethod ig/halt-key! :discord/messaging [_ chan]
-  (m/stop-connection! chan))
-
-;;;;;;;;;;;;;;;;;;;;;;;; Gateway event handlers
+; Multimethod for handling incoming Discord events
 (defmulti handle-event!
-  (fn [_ event-type _]
+  (fn [event-type _]
     event-type))
 
+; A new interaction was received (slash command or component)
 (defmethod handle-event! :interaction-create
-  [system _ data]
+  [_ data]
+  (debug "Received interaction")
   (let [interaction (discord/interaction-data data)]
     (case (:type interaction)
-      :application-command (ism/start-interaction! system interaction)
-      :message-component (ism/continue-interaction! system interaction))))
+      ; Slash commands start our request sequence
+      :application-command (ism/start-interaction! interaction)
+      ; Message components continue the request until they are complete or failed
+      :message-component (ism/continue-interaction! interaction))))
 
+; Once we receive a ready event, grab our bot-id
 (defmethod handle-event! :ready
-  [{:discord/keys [bot-id]} _ {{id :id} :user}]
-  (deliver bot-id id))
+  [_ {{id :id} :user}]
+  (info "Discord connection successful")
+  (swap! state/discord assoc :bot-id id))
 
 (defmethod handle-event! :guild-create
-  [{:discord/keys [bot-id messaging] :as system} _ {:keys [id]}]
-  (let [media-types (keys (:doplarr/backends system))
-        [{command-id :id}] @(discord/register-commands media-types @bot-id messaging id)]
+  [_ {:keys [id]}]
+  (info "Connected to guild")
+  (let [media-types (config/available-media)
+        messaging (:messaging @state/discord)
+        bot-id (:bot-id @state/discord)
+        [{command-id :id}] (discord/register-commands media-types bot-id messaging id)]
     (when (:role-id env)
-      (discord/set-permission @bot-id messaging id command-id))))
+      (discord/set-permission bot-id messaging id command-id))))
 
 (defmethod handle-event! :default
-  [_ _ _])
+  [event-type _]
+  (debug "Got unhandled event" event-type))
 
 (defn start-bot! []
-  (let [{:discord/keys [events] :as system} (ig/init config)]
-    (try (e/message-pump! events (partial handle-event! (select-keys system [:doplarr/backends
-                                                                             :doplarr/cache
-                                                                             :discord/messaging
-                                                                             :discord/bot-id])))
-         (finally (ig/halt! system)))))
+  (let [event-ch (a/chan 100)
+        token (:discord/token env)
+        connection-ch (c/connect-bot! token event-ch :intents #{:guilds})
+        messaging-ch (m/start-connection! token)
+        init-state {:connection connection-ch
+                    :event event-ch
+                    :messaging messaging-ch}]
+    (reset! state/discord init-state)
+    (try (e/message-pump! event-ch handle-event!)
+         (catch Exception e (fatal e "Exception thrown from event handler"))
+         (finally
+           (m/stop-connection! messaging-ch)
+           (a/close!           event-ch)))))
 
+; Program Entry Point
 (defn -main
   [& _]
-  (when-let [config-error (config/validate-config)]
-    (ex-info "Error in configuration" {:spec-error config-error})
-    (System/exit -1))
-  (start-bot!)
+  (config/validate-config)
   (shutdown-agents))
