@@ -21,6 +21,10 @@
 (spec/def :discord/max-results pos-int?)
 
 (spec/def :radarr/quality-profile string?)
+(spec/def :sonarr/quality-profile string?)
+(spec/def :sonarr/language-profile string?)
+
+(spec/def ::partial-seasons boolean?)
 
 (defn when-req [pred spec]
   (spec/nonconforming
@@ -36,7 +40,10 @@
                     (spec/keys :req [:discord/token]
                                :opt [:discord/role-id
                                      :discord/max-results
-                                     :radarr/quality-profile])
+                                     :radarr/quality-profile
+                                     :sonarr/quality-profile
+                                     :sonarr/language-profile
+                                     ::partial-seasons])
                     #(some (partial contains? %) [:sonarr/url
                                                   :radarr/url])
                     (matched-keys :sonarr/url :sonarr/api)
