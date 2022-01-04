@@ -55,7 +55,7 @@ you copied is correct.
 
 #### Do you have a support server?
 
-Yes! [here](https://discord.com/channels/890634173751119882/890634174195707965/890641954734485605)
+Yes! [here](https://discord.gg/884mGq2fV6)
 
 ## Setup
 
@@ -116,6 +116,20 @@ docker run \
 -e RADARR_API='radarr_api' \
 -e BOT_TOKEN='bot_token' \
 --name doplarr ghcr.io/kiranshila/doplarr:latest
+```
+
+Alternatively, use docker-compose:
+
+```yaml
+doplarr:
+    environment:
+        - ‘SONARR_URL=http://localhost:8989’
+        - ‘RADARR_URL=http://localhost:7878’
+        - SONARR_API=sonarr_api
+        - RADARR_API=radarr_api
+        - BOT_TOKEN=bot_token
+    container_name: doplarr
+    image: ‘ghcr.io/kiranshila/doplarr:latest’
 ```
 
 ## Building and Running Locally
