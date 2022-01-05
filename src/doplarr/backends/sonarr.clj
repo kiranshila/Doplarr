@@ -7,7 +7,7 @@
    [doplarr.backends.sonarr.impl :as impl]
    [clojure.core.async :as a]))
 
-(defn search [term]
+(defn search [term _]
   (utils/request-and-process-body
    impl/GET
    #(mapv utils/process-search-result %)

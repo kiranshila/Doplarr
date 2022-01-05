@@ -77,3 +77,10 @@
    (symbol (str "doplarr.backends." (name (config/available-backed-for-media
                                            media)))
            f)))
+
+(defmacro log-on-error [expr msg]
+  `(try
+     ~expr
+     (catch Exception e#
+       (fatal e# ~msg)
+       (throw e#))))

@@ -34,7 +34,7 @@
   (cond-> #{}
     (:radarr/url env) (conj :radarr)
     (:sonarr/url env) (conj :sonarr)
-    (:overserr/url env) (conj :overseerr)
+    (:overseerr/url env) (conj :overseerr)
     (:readarr/url env) (conj :readarr)
     (:lidarr/url env) (conj :lidarr)))
 

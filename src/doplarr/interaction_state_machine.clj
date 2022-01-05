@@ -9,7 +9,7 @@
    [discljord.messaging :as m]
    [clojure.string :as str]
    [doplarr.state :as state]
-   [doplarr.utils :as utils]))
+   [doplarr.utils :as utils :refer [log-on-error]]))
 
 (def channel-timeout 600000)
 
@@ -27,9 +27,11 @@
            (else #(fatal % "Error in interaction ack")))
                                         ; Search for results
       (info "Performing search for" (name media-type) query)
-      (let [results (->> (a/<! ((utils/media-fn media-type "search") query))
-                         (take (:max-results env 10))
-                         (into []))]
+      (let [results (->> (log-on-error
+                          (a/<! ((utils/media-fn media-type "search") query media-type))
+                          "Exception from search")
+                         (then #(->> (take (:max-results env 10) %)
+                                     (into []))))]
                                         ; Setup ttl cache entry
         (swap! state/cache assoc uuid {:results results
                                        :media-type media-type
@@ -44,7 +46,9 @@
     (let [{:keys [messaging bot-id]} @state/discord
           {:keys [media-type token payload]} (get @state/cache uuid)]
       (if (empty? pending-opts)
-        (let [embed (a/<! ((utils/media-fn media-type "request-embed") payload))]
+        (let [embed (log-on-error
+                     (a/<! ((utils/media-fn media-type "request-embed") payload))
+                     "Exception from request-embed")]
           (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/request embed uuid))
                (else #(fatal % "Error in sending request embed"))))
         (let [[op options] (first pending-opts)]
@@ -57,7 +61,9 @@
   (a/go
     (let [{:keys [results media-type]} (get @state/cache uuid)
           result (nth results (discord/dropdown-result interaction))
-          add-opts (a/<! ((utils/media-fn media-type "additional-options") result))
+          add-opts (log-on-error
+                    (a/<! ((utils/media-fn media-type "additional-options") result))
+                    "Exception thrown from additional-options")
           pending-opts (->> add-opts
                             (filter #(seq? (second %)))
                             (into {}))
@@ -80,8 +86,10 @@
         {:keys [payload media-type token]} (get @state/cache uuid)]
     (letfn [(msg-resp [msg] (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/content-response msg))
                                  (else #(fatal % "Error in message response"))))]
-      (->>  (a/<!! ((utils/media-fn media-type "request")
-                    (assoc payload :format (keyword format))))
+      (->>  (log-on-error
+             (a/<!! ((utils/media-fn media-type "request")
+                     (assoc payload :format (keyword format))))
+             "Exception from request")
             (then (fn [status]
                     (case status
                       :unauthorized (msg-resp "You do not have an associated account in the request backend")
