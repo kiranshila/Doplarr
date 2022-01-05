@@ -10,7 +10,7 @@
 <img alt="Discord" src="https://img.shields.io/discord/890634173751119882?color=ff69b4&label=discord&style=for-the-badge">
 </p>
 
-> A _Better_ Sonarr/Radarr Request Bot for Discord
+> A Sonarr/Radarr Request Bot for Discord
 
 ## Why does this exist
 
@@ -122,14 +122,14 @@ Alternatively, use docker-compose:
 
 ```yaml
 doplarr:
-    environment:
-        - ‘SONARR_URL=http://localhost:8989’
-        - ‘RADARR_URL=http://localhost:7878’
-        - SONARR_API=sonarr_api
-        - RADARR_API=radarr_api
-        - BOT_TOKEN=bot_token
-    container_name: doplarr
-    image: ‘ghcr.io/kiranshila/doplarr:latest’
+  environment:
+    - ‘SONARR_URL=http://localhost:8989’
+    - ‘RADARR_URL=http://localhost:7878’
+    - SONARR_API=sonarr_api
+    - RADARR_API=radarr_api
+    - BOT_TOKEN=bot_token
+  container_name: doplarr
+  image: ‘ghcr.io/kiranshila/doplarr:latest’
 ```
 
 ## Building and Running Locally
