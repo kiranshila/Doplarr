@@ -23,13 +23,8 @@
 ### Caveats
 
 I wanted a clean app for the sole purpose of requesting movies/TV shows.
-I personally didn't need Siri integration, support for old API versions, Ombi,
-etc., so those features are missing here.
 If you need Ombi support (for managing many people requesting), I suggest you check out Overseerr instead.
 There is only a boolean permission (role gated) for who has access to the bot, nothing fancy.
-
-If any of these don't suit your fancy, check out
-[Requestrr](https://github.com/darkalfx/requestrr)
 
 ### Screenshots
 
