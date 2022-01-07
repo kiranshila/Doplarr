@@ -14,7 +14,7 @@
    "/movie/lookup"
    {:query-params {:term term}}))
 
-(defn additional-options [_]
+(defn additional-options [_ _]
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
           {:keys [radarr/quality-profile]} env

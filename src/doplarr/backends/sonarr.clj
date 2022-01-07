@@ -14,7 +14,7 @@
    "/series/lookup"
    {:query-params {:term term}}))
 
-(defn additional-options [result]
+(defn additional-options [result _]
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
           language-profiles (a/<! (impl/language-profiles))

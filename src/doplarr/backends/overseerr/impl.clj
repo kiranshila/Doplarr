@@ -5,7 +5,8 @@
    [clojure.core.async :as a]
    [config.core :refer [env]]
    [fmnoise.flow :as flow :refer [then else]]
-   [doplarr.utils :as utils]))
+   [doplarr.utils :as utils]
+   [clojure.set :as set]))
 
 (def base-url (delay (str (:overseerr/url env) "/api/v1")))
 (def api-key  (delay (:overseerr/api env)))
@@ -19,14 +20,6 @@
 
 (defn POST [endpoint & [params]]
   (utils/http-request :post (str @base-url endpoint) @api-key params))
-
-(defn backend-4k? [media-type]
-  (a/go
-    (->> (a/<! (GET (str "/settings/" (if (= media-type "tv") "sonarr" "radarr"))))
-         (then #(->> (:body %)
-                     (map :is4k)
-                     (some identity)))
-         (else #(fatal % "Exception on checking Overseeerr 4K backend support")))))
 
 (defn parse-year [result]
   (.getYear (java.time.LocalDate/parse
@@ -42,7 +35,38 @@
                   s/ALL
                   (s/selected? :media-type (s/pred= media-type-str))
                   (s/view #(assoc % :year (parse-year %)))
-                  (s/submap [:title :id :year])])))
+                  (s/submap [:title :id :year :name])])
+       (map #(set/rename-keys % {:name :title}))))
+
+(defn media-type [kw]
+  (if (= :series kw)
+    "tv"
+    (name kw)))
+
+(defn details [id media-type-str]
+  (a/go
+    (->> (a/<! (GET (str "/" media-type-str "/" id)))
+         (then (comp :body utils/from-camel))
+         (else #(fatal % "Error requesting details on selection from Overseerr")))))
+
+(defn seasons-list [details]
+  (conj
+   (for [season (:seasons details)
+         :let [ssn (:season-number season)]
+         :when (> ssn 0)]
+     {:name (str ssn)
+      :id ssn})
+   {:name "All Seasons" :id -1}))
+
+;;; NOT MODIFED YET
+
+(defn backend-4k? [media-type]
+  (a/go
+    (->> (a/<! (GET (str "/settings/" (if (= media-type "tv") "sonarr" "radarr"))))
+         (then #(->> (:body %)
+                     (map :is4k)
+                     (some identity)))
+         (else #(fatal % "Exception on checking Overseeerr 4K backend support")))))
 
 (defn num-users []
   (a/go
@@ -71,14 +95,6 @@
       users
       (let [id (first ids)]
         (recur (rest ids) (assoc users (a/<! (discord-id id)) id))))))
-
-(defn details
-  ([selection] (details (:id selection) (:mediaType selection)))
-  ([id media-type]
-   (a/go
-     (->> (a/<! (GET (str "/" media-type "/" id)))
-          (then :body)
-          (else #(fatal % "Error requesting details on selection from Overseerr"))))))
 
 (defn series-status [selection & {:keys [is4k]}]
   (when-let [info (:mediaInfo selection)]
