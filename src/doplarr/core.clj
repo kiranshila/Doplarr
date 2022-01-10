@@ -10,7 +10,8 @@
    [doplarr.state :as state]
    [doplarr.interaction-state-machine :as ism]
    [doplarr.discord :as discord]
-   [clojure.core.async :as a])
+   [clojure.core.async :as a]
+   [clojure.string :as str])
   (:gen-class))
 
 ; Pipe tools.logging to timbre
@@ -52,8 +53,9 @@
       (discord/set-permission bot-id messaging id command-id))))
 
 (defmethod handle-event! :default
-  [event-type _]
-  (debug "Got unhandled event" event-type))
+  [event-type data]
+  (debug "Got unhandled event" event-type)
+  (debug data))
 
 (defn start-bot! []
   (let [event-ch (a/chan 100)

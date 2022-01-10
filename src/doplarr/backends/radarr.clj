@@ -27,7 +27,7 @@
          (= 1 (count quality-profiles)) (:id (first quality-profiles))
          :else quality-profiles)})))
 
-(defn request-embed [{:keys [title quality-profile-id tmdb-id]}]
+(defn request-embed [{:keys [title quality-profile-id tmdb-id]} _]
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
           details (a/<! (impl/get-from-tmdb tmdb-id))]

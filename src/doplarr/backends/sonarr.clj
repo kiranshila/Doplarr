@@ -45,7 +45,7 @@
                               (= 1 (count language-profiles)) (:id (first language-profiles))
                               :else language-profiles)})))
 
-(defn request-embed [{:keys [title quality-profile-id language-profile-id tvdb-id season]}]
+(defn request-embed [{:keys [title quality-profile-id language-profile-id tvdb-id season]} _]
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
           language-profiles (a/<! (impl/language-profiles))

@@ -115,6 +115,7 @@
    :thumbnail {:url (media-type request-thumbnail)}
    :fields (filterv
             identity
+            ; Some overrides to make things pretty
             [(when quality-profile
                {:name "Profile"
                 :value quality-profile})

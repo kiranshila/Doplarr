@@ -58,16 +58,22 @@
       :id ssn})
    {:name "All Seasons" :id -1}))
 
-;;; NOT MODIFED YET
-
-(defn backend-4k? [media-type]
+(defn backend-4k? [media]
   (a/go
-    (->> (a/<! (GET (str "/settings/" (if (= media-type "tv") "sonarr" "radarr"))))
+    (->> (a/<! (GET (str "/settings/" (if (= (media-type media) "tv") "sonarr" "radarr"))))
          (then #(->> (:body %)
                      (map :is4k)
                      (some identity)))
          (else #(fatal % "Exception on checking Overseeerr 4K backend support")))))
 
+(defn partial-seasons? []
+  (a/go
+    (->> (a/<! (GET "/settings/main"))
+         (then #(->> (utils/from-camel (:body %))
+                     :partial-requests-enabled))
+         (else #(fatal % "Exception testing for partial seasons")))))
+
+;;; NOT MODIFED YET
 (defn num-users []
   (a/go
     (->> (a/<! (GET "/user" {:query-params {:take 1}}))
@@ -137,10 +143,3 @@
                                  :content-type :json
                                  :headers {"X-API-User" (str ovsr-id)}}))
          (then (constantly nil)))))
-
-(defn partial-seasons? []
-  (a/go
-    (->> (a/<! (GET "/settings/main"))
-         (then #(->> (:body %)
-                     :partialRequestsEnabled))
-         (else #(fatal % "Exception testing for partial seasons")))))

@@ -47,7 +47,7 @@
           {:keys [media-type token payload]} (get @state/cache uuid)]
       (if (empty? pending-opts)
         (let [embed (log-on-error
-                     (a/<! ((utils/media-fn media-type "request-embed") payload))
+                     (a/<! ((utils/media-fn media-type "request-embed") payload media-type))
                      "Exception from request-embed")]
           (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/request embed uuid))
                (else #(fatal % "Error in sending request embed"))))
