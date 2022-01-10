@@ -35,6 +35,8 @@
                       2 :button
                       3 :select-menu})
 
+(def MAX-OPTIONS 25)
+
 (def request-thumbnail
   {:series "https://thetvdb.com/images/logo.png"
    :movie "https://i.imgur.com/44ueTES.png"})
@@ -82,9 +84,17 @@
               (map-indexed select-menu-option results))))
 
 (defn option-dropdown [option options uuid]
-  (dropdown (str "Which " (utils/canonical-option-name option) "?")
-            (str "option-select:" uuid ":" (name option))
-            (map #(hash-map :label (:name %) :value (:id %)) options)))
+  (let [ddown (dropdown (str "Which " (utils/canonical-option-name option) "?")
+                        (str "option-select:" uuid ":" (name option))
+                        (take MAX-OPTIONS (map #(hash-map :label (:name %) :value (:id %)) options)))]
+    (if (> (count options) MAX-OPTIONS)
+      (update-in ddown [:components] conj {:type 1
+                                           :components [{:type 2
+                                                         :style 1
+                                                         :custom_id (str "option-page:" uuid ":")
+                                                         :disabled false
+                                                         :label "More Options"}]})
+      ddown)))
 
 (defn dropdown-result [interaction]
   (Integer/parseInt (s/select-one [:payload :values 0] interaction)))

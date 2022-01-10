@@ -1,6 +1,6 @@
 (ns doplarr.core
   (:require
-   [taoensso.timbre :refer [info fatal debug]]
+   [taoensso.timbre :refer [info fatal debug] :as timbre]
    [taoensso.timbre.tools.logging :as tlog]
    [discljord.connections :as c]
    [discljord.messaging :as m]
@@ -15,6 +15,9 @@
 
 ; Pipe tools.logging to timbre
 (tlog/use-timbre)
+
+#_(timbre/merge-config! {:min-level [[#{"discljord.messaging.*"} :trace]
+                                     [#{"*"} :debug]]})
 
 ; Multimethod for handling incoming Discord events
 (defmulti handle-event!
@@ -71,4 +74,5 @@
 (defn -main
   [& _]
   (config/validate-config)
+  (start-bot!)
   (shutdown-agents))

@@ -62,7 +62,7 @@
     (let [{:keys [results media-type]} (get @state/cache uuid)
           result (nth results (discord/dropdown-result interaction))
           add-opts (log-on-error
-                    (a/<! ((utils/media-fn media-type "additional-options") result))
+                    (a/<! ((utils/media-fn media-type "additional-options") result media-type))
                     "Exception thrown from additional-options")
           pending-opts (->> add-opts
                             (filter #(seq? (second %)))
