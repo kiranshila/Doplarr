@@ -6,7 +6,8 @@
    [taoensso.timbre :refer [fatal]]
    [doplarr.utils :as utils]
    [fmnoise.flow :as flow :refer [else]]
-   [discljord.messaging :as m]))
+   [discljord.messaging :as m]
+   [clojure.set :as set]))
 
 (defn request-command [media-types]
   {:name "request"
@@ -64,6 +65,13 @@
    :custom_id (str "request:" uuid ":" format)
    :label (str/trim (str "Request " format))})
 
+(defn page-button [uuid option page label]
+  {:type 2
+   :style 1
+   :custom_id (str "option-page:" uuid ":" option "-" page)
+   :disabled false
+   :label label})
+
 (defn select-menu-option [index result]
   {:label (or (:title result) (:name result))
    :description (:year result)
@@ -83,18 +91,19 @@
               (str "result-select:" uuid)
               (map-indexed select-menu-option results))))
 
-(defn option-dropdown [option options uuid]
-  (let [ddown (dropdown (str "Which " (utils/canonical-option-name option) "?")
+(defn option-dropdown [option options uuid page]
+  (let [all-options (map #(set/rename-keys % {:name :label :id :value}) options)
+        chunked (partition-all MAX-OPTIONS all-options)
+        ddown (dropdown (str "Which " (utils/canonical-option-name option) "?")
                         (str "option-select:" uuid ":" (name option))
-                        (take MAX-OPTIONS (map #(hash-map :label (:name %) :value (:id %)) options)))]
-    (if (> (count options) MAX-OPTIONS)
-      (update-in ddown [:components] conj {:type 1
-                                           :components [{:type 2
-                                                         :style 1
-                                                         :custom_id (str "option-page:" uuid ":")
-                                                         :disabled false
-                                                         :label "More Options"}]})
-      ddown)))
+                        (nth chunked page))]
+    (cond-> ddown
+      ; Create the action row if we have more than 1 chunk
+      (> (count chunked) 1) (update-in [:components] conj {:type 1 :components []})
+      ; More chunks exist
+      (< page (dec (count chunked))) (update-in [:components 1 :components] conj (page-button uuid (name option) (inc page) "More"))
+      ; Past chunk 1
+      (> page 0) (update-in [:components 1 :components] conj (page-button uuid (name option) (dec page) "Less")))))
 
 (defn dropdown-result [interaction]
   (Integer/parseInt (s/select-one [:payload :values 0] interaction)))

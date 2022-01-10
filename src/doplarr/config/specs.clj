@@ -18,7 +18,8 @@
 
 ; Optional settings
 (spec/def :discord/role-id string?)
-(spec/def :discord/max-results pos-int?)
+(spec/def :discord/max-results #(and (pos-int? %)
+                                     (<= % 25)))
 
 (spec/def :radarr/quality-profile string?)
 (spec/def :sonarr/quality-profile string?)

@@ -52,7 +52,7 @@
           (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/request embed uuid))
                (else #(fatal % "Error in sending request embed"))))
         (let [[op options] (first pending-opts)]
-          (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/option-dropdown op options uuid))
+          (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/option-dropdown op options uuid 0))
                (else #(fatal % "Error in creating option dropdown"))))))))
 
 (defmulti process-event! (fn [event _ _ _] event))
@@ -74,6 +74,16 @@
                                         ; Merge in the opts that are already satisfied
       (swap! state/cache update-in [uuid :payload] merge ready-opts)
       (query-for-option-or-request pending-opts uuid))))
+
+(defmethod process-event! "option-page" [_ _ uuid option]
+  (let [{:keys [messaging bot-id]} @state/discord
+        {:keys [pending-opts token]} (get @state/cache uuid)
+        [opt page] (str/split option #"-")
+        op (keyword opt)
+        page (Long/parseLong page)
+        options (op pending-opts)]
+    (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/option-dropdown op options uuid page))
+         (else #(fatal % "Error in updating option dropdown")))))
 
 (defmethod process-event! "option-select" [_ interaction uuid option]
   (let [selection (discord/dropdown-result interaction)
