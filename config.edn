@@ -1,6 +1,16 @@
-{:sonarr-url "http://localhost:8989"
- :sonarr-api "sonarr_api_kei"
- :radarr-url "http://localhost:7878"
- :radarr-api "radarr_api_kei"
- :bot-token "bot_token"
- :role-id "role_id"}
+{:sonarr/url ""
+ :sonarr/api ""
+ :radarr/url ""
+ :radarr/api ""
+ ; :overseerr/url ""
+ ; :overseerr/api ""
+ :discord/token ""
+ ; -- Optional Settings
+ ; :partial-seasons false
+ ; :sonarr/quality-profile ""
+ ; :radarr/quality-profile ""
+ ; :sonarrr/language-profile ""
+ ; :discord/role-id ""
+ ; :discord/max-results 10
+ ; :overseerr/default-id 1
+ }

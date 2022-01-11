@@ -59,7 +59,7 @@
        :quality-profile (:name (first (filter #(= quality-profile-id (:id %)) quality-profiles)))
        :language-profile (:name (first (filter #(= language-profile-id (:id %)) language-profiles)))})))
 
-(defn request [payload]
+(defn request [payload _]
   (a/go (let [details  (a/<! (if-let [id (:id payload)]
                                (impl/get-from-id id)
                                (impl/get-from-tvdb (:tvdb-id payload))))

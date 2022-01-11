@@ -30,7 +30,7 @@
       (let [results (->> (log-on-error
                           (a/<! ((utils/media-fn media-type "search") query media-type))
                           "Exception from search")
-                         (then #(->> (take (:max-results env 10) %)
+                         (then #(->> (take (:max-results env discord/MAX-OPTIONS) %)
                                      (into []))))]
                                         ; Setup ttl cache entry
         (swap! state/cache assoc uuid {:results results
@@ -91,18 +91,20 @@
     (swap! state/cache assoc-in [uuid :payload (keyword option)] selection)
     (query-for-option-or-request (get-in cache-val [uuid :pending-opts]) uuid)))
 
-(defmethod process-event! "request" [_ _ uuid format]
+(defmethod process-event! "request" [_ interaction uuid format]
   (let [{:keys [messaging bot-id]} @state/discord
-        {:keys [payload media-type token]} (get @state/cache uuid)]
+        {:keys [payload media-type token]} (get @state/cache uuid)
+        {:keys [user-id]} interaction]
     (letfn [(msg-resp [msg] (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/content-response msg))
                                  (else #(fatal % "Error in message response"))))]
       (->>  (log-on-error
              (a/<!! ((utils/media-fn media-type "request")
-                     (assoc payload :format (keyword format))))
+                     (assoc payload :format (keyword format) :discord-id user-id)
+                     media-type))
              "Exception from request")
             (then (fn [status]
                     (case status
-                      :unauthorized (msg-resp "You do not have an associated account in the request backend")
+                      :unauthorized (msg-resp "You are unauthorized to perform this request in the configured backend")
                       :pending (msg-resp "This has already been requested and the request is pending")
                       :processing (msg-resp "This is currently processing and should be available soon!")
                       :available (msg-resp "This selection is already available!")
@@ -125,7 +127,7 @@
     (->> @(m/create-interaction-response! messaging id token 6)
          (else #(fatal % "Error sending response ack")))
     ; Check last modified
-    (let [{:keys [token last-modified]} (get @state/cache uuid)]
+    (if-let [{:keys [token last-modified]} (get @state/cache uuid)]
       (if (> (- now last-modified) channel-timeout)
         ; Update interaction with timeout message
         (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/content-response "Request timed out, please try again"))
@@ -133,4 +135,6 @@
         ; Move through the state machine to update cache side effecting new components
         (do
           (swap! state/cache assoc-in [uuid :last-modified] now)
-          (process-event! event interaction uuid option))))))
+          (process-event! event interaction uuid option)))
+      (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/content-response "Request timed out, please try again"))
+           (else #(fatal % "Error in sending timeout response"))))))

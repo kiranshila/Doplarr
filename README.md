@@ -10,13 +10,13 @@
 <img alt="Discord" src="https://img.shields.io/discord/890634173751119882?color=ff69b4&label=discord&style=for-the-badge">
 </p>
 
-> A Sonarr/Radarr Request Bot for Discord
+> An \*arr Request Bot for Discord
 
 ## Why does this exist
 
-- Uses modern Discord slash commands and components, which provides a clean, performant UI on desktop and mobile
-  - This has the added benifit of not requiring privileged intents, so this bot will _never_ look at message content
-- Simple codebase, <1k lines of code which makes it easier to maintain. [Code is not an asset](https://robinbb.com/blog/code-is-not-an-asset/)
+- Uses modern Discord slash commands and components, which provides a clean, performant UI on desktop and mobile.
+  This has the added benefit of not requiring privileged intents, so this bot will _never_ look at message content
+- Small codebase as [code is not an asset](https://robinbb.com/blog/code-is-not-an-asset/)
 - Simple configuration, no need to have a whole web frontend just for configuration
 - Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly good combination 😛
 
@@ -36,10 +36,7 @@ There is only a boolean permission (role gated) for who has access to the bot, n
 
 #### Will you support Lidarr/Readarr/\*arr
 
-Not yet. The idea is that one can work directly with the collection managers or
-work through a request manager (Overseerr). As Overseerr doesn't support
-collections managers other than radarr/sonarr and I want feature-parity, those
-other managers will be left out until Overseerr supports them.
+Soon™
 
 #### Why are the commands greyed out?
 
@@ -96,8 +93,8 @@ This bot isn't meant to wrap the entirety of what Overseerr can do, just the
 necessary bits for requesting with optional 4K and quota support. Just use the
 web interface to Overseerr if you need more features.
 
-In the config, you replace `SONARR_URL`, `SONARR_API`, `RADARR_URL`,
-`RADARR_API` with `OVERSEERR_URL` and `OVERSEERR_API`.
+In the config, you replace `SONARR__URL`, `SONARR__API`, `RADARR__URL`,
+`RADARR__API` with `OVERSEERR__URL` and `OVERSEERR__API`.
 
 ## Running with Docker
 
@@ -105,11 +102,11 @@ Simply run with
 
 ```bash
 docker run \
--e SONARR_URL='http://localhost:8989' \
--e RADARR_URL='http://localhost:7878' \
--e SONARR_API='sonarr_api' \
--e RADARR_API='radarr_api' \
--e BOT_TOKEN='bot_token' \
+-e SONARR__URL='http://localhost:8989' \
+-e RADARR__URL='http://localhost:7878' \
+-e SONARR__API='sonarr_api' \
+-e RADARR__API='radarr_api' \
+-e DISCORD__TOKEN='bot_token' \
 --name doplarr ghcr.io/kiranshila/doplarr:latest
 ```
 
@@ -118,11 +115,11 @@ Alternatively, use docker-compose:
 ```yaml
 doplarr:
   environment:
-    - ‘SONARR_URL=http://localhost:8989’
-    - ‘RADARR_URL=http://localhost:7878’
-    - SONARR_API=sonarr_api
-    - RADARR_API=radarr_api
-    - BOT_TOKEN=bot_token
+    - SONARR__URL='http://localhost:8989’
+    - RADARR__URL='http://localhost:7878’
+    - SONARR__API=sonarr_api
+    - RADARR__API=radarr_api
+    - DISCORD__TOKEN=bot_token
   container_name: doplarr
   image: ‘ghcr.io/kiranshila/doplarr:latest’
 ```
@@ -142,11 +139,15 @@ To skip the build, just download `Doplarr.jar` and `config.edn` from the release
 
 ### Optional Settings
 
-| Environment Variable (Docker) | Config File Keyword | Type    | Description                                                                                      |
-| ----------------------------- | ------------------- | ------- | ------------------------------------------------------------------------------------------------ |
-| `MAX_RESULTS`                 | `:max-results`      | Integer | Sets the maximum size of the search results selection                                            |
-| `ROLE_ID`                     | `:role-id`          | String  | The discord role id for users of the bot (omitting this lets everyone on the server use the bot) |
-| `PARTIAL_SEASONS`             | `:partial-seasons`  | Boolean | Sets whether users can request partial seasons. Defaults to true or setting in Overseer          |
+| Environment Variable (Docker) | Config File Keyword        | Type    | Default Value | Description                                                                                         |
+| ----------------------------- | -------------------------- | ------- | ------------- | --------------------------------------------------------------------------------------------------- |
+| `DISCORD__MAX_RESULTS`        | `:discord/max-results`     | Integer | 25            | Sets the maximum size of the search results selection                                               |
+| `DISCORD__ROLE_ID`            | `:discord/role-id`         | String  | N/A           | The discord role id for users of the bot (omitting this lets everyone on the server use the bot)    |
+| `PARTIAL_SEASONS`             | `:partial-seasons`         | Boolean | True          | Sets whether users can request partial seasons.                                                     |
+| `SONARR__QUALITY_PROFILE`     | `:sonarr/quality-profile`  | String  | N/A           | The name of the quality profile to use by default for Sonarr                                        |
+| `RADARR__QUALITY_PROFILE`     | `:radarr/quality-profile`  | String  | N/A           | The name of the quality profile to use by default for Radarr                                        |
+| `SONARR__LANGUAGE_PROFILE`    | `:sonarr/language-profile` | String  | N/A           | The name of the language profile to use by default for Radarr                                       |
+| `OVERSEERR__DEFAULT_ID`       | `:overseerr/default-id`    | Integer | N/A           | The Overseerr user id to use by default if there is no associated discord account for the requester |
 
 ### Setting up on Windows
 

@@ -38,7 +38,7 @@
        :request-formats [""]
        :quality-profile (utils/profile-id-name quality-profiles quality-profile-id)})))
 
-(defn request [payload]
+(defn request [payload _]
   (a/go
     (let [status (impl/status (a/<! (impl/get-from-tmdb (:tmdb-id payload))))]
       (if status
