@@ -16,7 +16,7 @@
 ; Pipe tools.logging to timbre
 (tlog/use-timbre)
 
-(timbre/merge-config! {:min-level [[#{"*"} :info]]})
+(timbre/merge-config! {:min-level [[#{"*"} (:log-level env :info)]]})
 
 ; Multimethod for handling incoming Discord events
 (defmulti handle-event!

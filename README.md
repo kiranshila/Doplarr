@@ -141,13 +141,14 @@ To skip the build, just download `Doplarr.jar` and `config.edn` from the release
 
 | Environment Variable (Docker) | Config File Keyword        | Type    | Default Value | Description                                                                                         |
 | ----------------------------- | -------------------------- | ------- | ------------- | --------------------------------------------------------------------------------------------------- |
-| `DISCORD__MAX_RESULTS`        | `:discord/max-results`     | Integer | 25            | Sets the maximum size of the search results selection                                               |
+| `DISCORD__MAX_RESULTS`        | `:discord/max-results`     | Integer | `25`          | Sets the maximum size of the search results selection                                               |
 | `DISCORD__ROLE_ID`            | `:discord/role-id`         | String  | N/A           | The discord role id for users of the bot (omitting this lets everyone on the server use the bot)    |
-| `PARTIAL_SEASONS`             | `:partial-seasons`         | Boolean | True          | Sets whether users can request partial seasons.                                                     |
 | `SONARR__QUALITY_PROFILE`     | `:sonarr/quality-profile`  | String  | N/A           | The name of the quality profile to use by default for Sonarr                                        |
 | `RADARR__QUALITY_PROFILE`     | `:radarr/quality-profile`  | String  | N/A           | The name of the quality profile to use by default for Radarr                                        |
 | `SONARR__LANGUAGE_PROFILE`    | `:sonarr/language-profile` | String  | N/A           | The name of the language profile to use by default for Radarr                                       |
 | `OVERSEERR__DEFAULT_ID`       | `:overseerr/default-id`    | Integer | N/A           | The Overseerr user id to use by default if there is no associated discord account for the requester |
+| `PARTIAL_SEASONS`             | `:partial-seasons`         | Boolean | `true`        | Sets whether users can request partial seasons.                                                     |
+| `LOG_LEVEL`                   | `:log-level`               | Keyword | `:info`       | The log level for the logging backend. This can be changed for debugging purposes.                  |
 
 ### Setting up on Windows
 

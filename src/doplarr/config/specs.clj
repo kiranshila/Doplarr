@@ -19,6 +19,7 @@
 (spec/def :discord/token string?)
 
 ;  --- Optional settings
+(spec/def ::log-level keyword?)
 (spec/def :discord/role-id string?)
 (spec/def :discord/max-results #(and (pos-int? %)
                                      (<= % 25)))
@@ -47,7 +48,8 @@
 ; Complete configuration
 (spec/def ::config (spec/and
                     (spec/keys :req [:discord/token]
-                               :opt [:discord/role-id
+                               :opt [::log-level
+                                     :discord/role-id
                                      :discord/max-results
                                      :radarr/quality-profile
                                      :sonarr/quality-profile
