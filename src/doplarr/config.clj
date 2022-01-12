@@ -1,24 +1,48 @@
 (ns doplarr.config
   (:require
-   [config.core :refer [env]]))
+   [config.core :refer [env]]
+   [taoensso.timbre :refer [info fatal]]
+   [doplarr.config.specs :as specs]
+   [clojure.spec.alpha :as spec]
+   [clojure.set :as set]))
 
-(def bot-requirements #{:bot-token})
+(defn validate-config []
+  (if (spec/valid? ::specs/config env)
+    (info "Configuration is valid")
+    (do (fatal "Error in configuration"
+               :info
+               (->> (spec/explain-data ::specs/config env)
+                    ::spec/problems
+                    (into [])))
+        (System/exit -1))))
 
-(def direct-requirements #{:sonarr-url
-                           :sonarr-api
-                           :radarr-url
-                           :radarr-api})
+(def backend-media {:radarr [:movie]
+                    :sonarr [:series]
+                    :overseerr [:movie :series]
+                    :readarr [:book]
+                    :lidarr [:music]})
 
-(def overseerr-requirements #{:overseerr-url
-                              :overseerr-api})
+(def media-backend
+  (-> (for [[key types] backend-media]
+        (for [type types]
+          [key type]))
+      (->> (mapcat identity)
+           (group-by second))
+      (update-vals (partial map first))))
 
-;; Default to overseerr if both are configured
-(defn backend []
-  (cond
-    (every? env overseerr-requirements) :overseerr
-    (every? env direct-requirements) :direct
-    :else nil))
+(defn available-backends []
+  (cond-> #{}
+    (:radarr/url env) (conj :radarr)
+    (:sonarr/url env) (conj :sonarr)
+    (:overseerr/url env) (conj :overseerr)
+    (:readarr/url env) (conj :readarr)
+    (:lidarr/url env) (conj :lidarr)))
 
-(defn validate-env []
-  (and (every? env bot-requirements)
-       (keyword? (backend))))
+(defn available-media []
+  (into #{} (flatten (map backend-media (available-backends)))))
+
+(defn available-backed-for-media [media]
+  (first
+   (set/intersection
+    (available-backends)
+    (into #{} (media-backend media)))))

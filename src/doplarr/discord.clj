@@ -1,39 +1,32 @@
 (ns doplarr.discord
   (:require
    [config.core :refer [env]]
+   [com.rpl.specter :as s]
+   [clojure.string :as str]
+   [taoensso.timbre :refer [fatal]]
+   [doplarr.utils :as utils]
+   [fmnoise.flow :as flow :refer [else]]
    [discljord.messaging :as m]
-   [clojure.core.cache.wrapped :as cache]
-   [com.rpl.specter :as s]))
+   [clojure.set :as set]))
 
-(defonce state (atom nil))
-(defonce cache (cache/ttl-cache-factory {} :ttl 900000)) ; 15 Minute cache expiration, coinciding with the interaction token
-
-(def channel-timeout 600000)
-
-(def request-command
+(defn request-command [media-types]
   {:name "request"
-   :description "Request a series or movie"
+   :description "Request media"
    :default_permission (boolean (not (:role-id env)))
    :options
-   [{:type 1
-     :name "series"
-     :description "Request a series"
-     :options
-     [{:type 3
-       :name "term"
-       :description "Search term"
-       :required true}]}
-    {:type 1
-     :name "movie"
-     :description "Request a movie",
-     :options
-     [{:type 3
-       :name "term"
-       :description "Search term"
-       :required true}]}]})
+   (into [] (for [media media-types]
+              {:type 1
+               :name (name media)
+               :description (str "Request " (name media))
+               :options [{:type 3
+                          :name "query"
+                          :description "Query"
+                          :required true}]}))})
 
 (defn content-response [content]
   {:content content
+   :flags 64
+   :embeds []
    :components []})
 
 (def interaction-types {1 :ping
@@ -44,62 +37,12 @@
                       2 :button
                       3 :select-menu})
 
-(def max-results (delay (:max-results env 10)))
+(def MAX-OPTIONS 25)
+(def MAX-CHARACTERS 100)
 
 (def request-thumbnail
   {:series "https://thetvdb.com/images/logo.png"
    :movie "https://i.imgur.com/44ueTES.png"})
-
-;; Discljord setup
-(defn register-commands [guild-id]
-  (m/bulk-overwrite-guild-application-commands!
-   (:messaging @state)
-   (:id @state)
-   guild-id
-   [request-command]))
-
-(defn set-permission [guild-id command-id]
-  (m/edit-application-command-permissions!
-   (:messaging @state)
-   (:id @state)
-   guild-id
-   command-id
-   [{:id (:role-id env)
-     :type 1
-     :permission true}]))
-
-(defn interaction-response [interaction-id interaction-token type & {:keys [ephemeral? content components embeds]}]
-  (m/create-interaction-response!
-   (:messaging @state)
-   interaction-id
-   interaction-token
-   type
-   :data
-   (cond-> {}
-     ephemeral? (assoc :flags 64)
-     content (assoc :content content)
-     components (assoc :components components)
-     embeds (assoc :embeds embeds))))
-
-(defn followup-repsonse [interaction-token & {:keys [ephermeral? content components embeds]}]
-  (m/create-followup-message!
-   (:messaging @state)
-   (:id @state)
-   interaction-token
-   (cond-> {}
-     ephermeral? (assoc :flags 64)
-     content (assoc :content content)
-     components (assoc :components components)
-     embeds (assoc :embeds embeds))))
-
-(defn update-interaction-response [interaction-token & {:keys [content components embeds]}]
-  (m/edit-original-interaction-response!
-   (:messaging @state)
-   (:id @state)
-   interaction-token
-   :content content
-   :components components
-   :embeds embeds))
 
 (defn application-command-interaction-option-data [app-com-int-opt]
   [(keyword (:name app-com-int-opt))
@@ -110,6 +53,7 @@
    :type (interaction-types (:type interaction))
    :token (:token interaction)
    :user-id (s/select-one [:member :user :id] interaction)
+   :channel-id (:channel-id interaction)
    :payload
    {:component-type (component-types (get-in interaction [:data :component-type]))
     :component-id (s/select-one [:data :custom-id] interaction)
@@ -117,27 +61,28 @@
     :values (s/select-one [:data :values] interaction)
     :options (into {} (map application-command-interaction-option-data) (get-in interaction [:data :options]))}})
 
-(defn request-button [uuid enabled?]
+(defn request-button [format uuid]
   {:type 2
    :style 1
-   :disabled (not enabled?)
-   :custom_id (str "request:" uuid)
-   :label "Request"})
+   :disabled false
+   :custom_id (str "request:" uuid ":" format)
+   :label (str/trim (str "Request " format))})
 
-(defn request-4k-button [uuid enabled?]
+(defn page-button [uuid option page label]
   {:type 2
    :style 1
-   :disabled (not enabled?)
-   :custom_id (str "request-4k:" uuid)
-   :label "Request 4K"})
+   :custom_id (str "option-page:" uuid ":" option "-" page)
+   :disabled false
+   :label label})
 
 (defn select-menu-option [index result]
-  {:label (or (:title result) (:name result))
+  {:label (apply str (take MAX-CHARACTERS (or (:title result) (:name result))))
    :description (:year result)
    :value index})
 
 (defn dropdown [content id options]
   {:content content
+   :flags 64
    :components [{:type 1
                  :components [{:type 3
                                :custom_id id
@@ -145,49 +90,63 @@
 
 (defn search-response [results uuid]
   (if (empty? results)
-    {:content "Search result returned no hits"}
+    {:content "Search result returned no hits"
+     :flags 64}
     (dropdown "Choose one of the following results"
               (str "result-select:" uuid)
               (map-indexed select-menu-option results))))
 
-(defn select-profile [profiles uuid]
-  (dropdown "Which quality profile?"
-            (str "profile-select:" uuid)
-            (map #(hash-map :label (:name %) :value (:id %)) profiles)))
+(defn option-dropdown [option options uuid page]
+  (let [all-options (map #(set/rename-keys % {:name :label :id :value}) options)
+        chunked (partition-all MAX-OPTIONS all-options)
+        ddown (dropdown (str "Which " (utils/canonical-option-name option) "?")
+                        (str "option-select:" uuid ":" (name option))
+                        (nth chunked page))]
+    (cond-> ddown
+      ; Create the action row if we have more than 1 chunk
+      (> (count chunked) 1) (update-in [:components] conj {:type 1 :components []})
+      ; More chunks exist
+      (< page (dec (count chunked))) (update-in [:components 1 :components] conj (page-button uuid (name option) (inc page) "More"))
+      ; Past chunk 1
+      (> page 0) (update-in [:components 1 :components] conj (page-button uuid (name option) (dec page) "Less")))))
 
-(defn selection-embed [selection & {:keys [season profile]}]
-  {:title (:title selection)
-   :description (:overview selection)
-   :image {:url (:remotePoster selection)}
-   :thumbnail {:url (request-thumbnail (if season :series :movie))}
+(defn dropdown-result [interaction]
+  (Integer/parseInt (s/select-one [:payload :values 0] interaction)))
+
+(defn request-embed [{:keys [media-type title overview poster season quality-profile language-profile]}]
+  {:title title
+   :description overview
+   :image {:url poster}
+   :thumbnail {:url (media-type request-thumbnail)}
    :fields (filterv
             identity
-            [(when profile
+            ; Some overrides to make things pretty
+            [(when quality-profile
                {:name "Profile"
-                :value profile})
+                :value quality-profile})
+             (when language-profile
+               {:name "Language Profile"
+                :value language-profile})
              (when season
                {:name "Season"
-                :value (if (= season -1)
-                         "All"
-                         season)})])})
+                :value (if (= season -1) "All" season)})])})
 
-(defn request [selection uuid & {:keys [season profile]}]
-  {:content (str "Request this " (if season "series" "movie") " ?")
-   :embeds [(selection-embed selection :season season :profile profile)]
-   :components [{:type 1 :components (filterv identity [(request-button uuid true)
-                                                        (when (:backend-4k selection)
-                                                          (request-4k-button uuid true))])}]})
+(defn request [embed-data uuid]
+  {:content (str "Request this " (name (:media-type embed-data)) " ?")
+   :embeds [(request-embed embed-data)]
+   :flags 64
+   :components [{:type 1 :components (for [format (:request-formats embed-data)]
+                                       (request-button format uuid))}]})
 
-(defn request-alert [selection & {:keys [season profile]}]
-  {:content "This has been requested!"
-   :embeds [(selection-embed selection :season season :profile profile)]})
+;; Discljord Utilities
+(defn register-commands [media-types bot-id messaging guild-id]
+  (->> @(m/bulk-overwrite-guild-application-commands!
+         messaging bot-id guild-id
+         [(request-command media-types)])
+       (else #(fatal % "Error in registering commands"))))
 
-(defn select-season [series uuid]
-  (dropdown "Which season?"
-            (str "season-select:" uuid)
-            (conj (map #(hash-map :label (str "Season: " %) :value %)
-                       (range 1 (inc (:seasonCount series))))
-                  {:label "All Seasons" :value "-1"})))
-
-(defn dropdown-index [interaction]
-  (Integer/parseInt (s/select-one [:payload :values 0] interaction)))
+(defn set-permission [bot-id messaging guild-id command-id]
+  (->> @(m/edit-application-command-permissions!
+         messaging bot-id guild-id command-id
+         [{:id (:role-id env) :type 1 :permission true}])
+       (else #(fatal % "Error in setting command permissions"))))
