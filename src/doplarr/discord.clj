@@ -25,6 +25,7 @@
 
 (defn content-response [content]
   {:content content
+   :flags 64
    :embeds []
    :components []})
 
@@ -81,6 +82,7 @@
 
 (defn dropdown [content id options]
   {:content content
+   :flags 64
    :components [{:type 1
                  :components [{:type 3
                                :custom_id id
@@ -131,6 +133,7 @@
 (defn request [embed-data uuid]
   {:content (str "Request this " (name (:media-type embed-data)) " ?")
    :embeds [(request-embed embed-data)]
+   :flags 64
    :components [{:type 1 :components (for [format (:request-formats embed-data)]
                                        (request-button format uuid))}]})
 
