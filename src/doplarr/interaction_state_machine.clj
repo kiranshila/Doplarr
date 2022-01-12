@@ -94,7 +94,7 @@
 (defmethod process-event! "request" [_ interaction uuid format]
   (let [{:keys [messaging bot-id]} @state/discord
         {:keys [payload media-type token]} (get @state/cache uuid)
-        {:keys [user-id]} interaction]
+        {:keys [user-id channel-id]} interaction]
     (letfn [(msg-resp [msg] (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/content-response msg))
                                  (else #(fatal % "Error in message response"))))]
       (->>  (log-on-error
@@ -109,7 +109,9 @@
                       :processing (msg-resp "This is currently processing and should be available soon!")
                       :available (msg-resp "This selection is already available!")
                       (do
-                        #_(m/create-message! messaging)
+                        (m/create-message! messaging channel-id
+                                           :content
+                                           (str "<@" user-id "> has requested the " (name media-type) " " (:title payload) " and it should be available soon!"))
                         (msg-resp "Request performed!")))))
             (else (fn [e]
                     (let [{:keys [status body] :as data} (ex-data e)]

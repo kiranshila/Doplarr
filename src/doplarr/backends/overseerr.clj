@@ -42,7 +42,7 @@
 (defn request [payload media-type]
   (a/go
     (let [{:keys [format id season season-count discord-id]} payload
-          {:keys [default-id]} env
+          {:overseerr/keys [default-id]} env
           details (a/<! (impl/details id media-type))
           ovsr-id ((a/<! (impl/discord-users)) discord-id)
           status (impl/media-status details media-type
