@@ -90,7 +90,8 @@
 
 (defn search-response [results uuid]
   (if (empty? results)
-    {:content "Search result returned no hits"}
+    {:content "Search result returned no hits"
+     :flags 64}
     (dropdown "Choose one of the following results"
               (str "result-select:" uuid)
               (map-indexed select-menu-option results))))
