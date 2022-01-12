@@ -23,7 +23,7 @@
           query (s/select-one [media-type :query] payload-opts)
           {:keys [messaging bot-id]} @state/discord]
                                         ; Send the ack for delayed response
-      (->> @(m/create-interaction-response! messaging id token 5 :data {:ephemeral? true})
+      (->> @(m/create-interaction-response! messaging id token 5 :data {:flags 64})
            (else #(fatal % "Error in interaction ack")))
                                         ; Search for results
       (info "Performing search for" (name media-type) query)
