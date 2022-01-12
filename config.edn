@@ -13,4 +13,5 @@
  ; :discord/role-id ""
  ; :discord/max-results 10
  ; :overseerr/default-id 1
+ ; :log-level :trace
  }
