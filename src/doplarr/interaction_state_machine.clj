@@ -108,7 +108,9 @@
                       :pending (msg-resp "This has already been requested and the request is pending")
                       :processing (msg-resp "This is currently processing and should be available soon!")
                       :available (msg-resp "This selection is already available!")
-                      (msg-resp "Request performed!"))))
+                      (do
+                        #_(m/create-message! messaging)
+                        (msg-resp "Request performed!")))))
             (else (fn [e]
                     (let [{:keys [status body] :as data} (ex-data e)]
                       (if (= status 403)

@@ -54,8 +54,7 @@
 
 (defmethod handle-event! :default
   [event-type data]
-  (debug "Got unhandled event" event-type)
-  (debug data))
+  (debug "Got unhandled event" event-type data))
 
 (defn start-bot! []
   (let [event-ch (a/chan 100)

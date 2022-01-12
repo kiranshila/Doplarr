@@ -37,6 +37,7 @@
                       3 :select-menu})
 
 (def MAX-OPTIONS 25)
+(def MAX-CHARACTERS 100)
 
 (def request-thumbnail
   {:series "https://thetvdb.com/images/logo.png"
@@ -73,7 +74,7 @@
    :label label})
 
 (defn select-menu-option [index result]
-  {:label (or (:title result) (:name result))
+  {:label (apply str (take MAX-CHARACTERS (or (:title result) (:name result))))
    :description (:year result)
    :value index})
 
@@ -131,10 +132,6 @@
    :embeds [(request-embed embed-data)]
    :components [{:type 1 :components (for [format (:request-formats embed-data)]
                                        (request-button format uuid))}]})
-
-(defn request-alert [requestable]
-  {:content "This has been requested!"
-   :embeds [(request-embed requestable)]})
 
 ;; Discljord Utilities
 (defn register-commands [media-types bot-id messaging guild-id]
