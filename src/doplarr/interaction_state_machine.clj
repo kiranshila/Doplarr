@@ -109,9 +109,12 @@
                       :processing (msg-resp "This is currently processing and should be available soon!")
                       :available (msg-resp "This selection is already available!")
                       (do
+                        (info "Performing request for " payload)
                         (m/create-message! messaging channel-id
                                            :content
-                                           (str "<@" user-id "> has requested the " (name media-type) " " (:title payload) " and it should be available soon!"))
+                                           (str "<@" user-id "> has requested the "
+                                                (name media-type) " `" (:title payload) " (" (:year payload) ")"
+                                                "` and it should be available soon!"))
                         (msg-resp "Request performed!")))))
             (else (fn [e]
                     (let [{:keys [status body] :as data} (ex-data e)]

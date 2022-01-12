@@ -10,15 +10,13 @@
    [doplarr.state :as state]
    [doplarr.interaction-state-machine :as ism]
    [doplarr.discord :as discord]
-   [clojure.core.async :as a]
-   [clojure.string :as str])
+   [clojure.core.async :as a])
   (:gen-class))
 
 ; Pipe tools.logging to timbre
 (tlog/use-timbre)
 
-#_(timbre/merge-config! {:min-level [[#{"discljord.messaging.*"} :trace]
-                                     [#{"*"} :debug]]})
+(timbre/merge-config! {:min-level [[#{"*"} :info]]})
 
 ; Multimethod for handling incoming Discord events
 (defmulti handle-event!

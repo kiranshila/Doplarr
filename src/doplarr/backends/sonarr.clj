@@ -1,9 +1,9 @@
 (ns doplarr.backends.sonarr
   (:require
-   [taoensso.timbre :refer [warn fatal]]
+   [taoensso.timbre :refer [warn]]
    [config.core :refer [env]]
    [doplarr.utils :as utils]
-   [fmnoise.flow :refer [then else]]
+   [fmnoise.flow :refer [then]]
    [doplarr.backends.sonarr.impl :as impl]
    [clojure.core.async :as a]))
 
