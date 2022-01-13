@@ -142,7 +142,7 @@ To skip the build, just download `Doplarr.jar` and `config.edn` from the release
 | Environment Variable (Docker) | Config File Keyword        | Type    | Default Value | Description                                                                                         |
 | ----------------------------- | -------------------------- | ------- | ------------- | --------------------------------------------------------------------------------------------------- |
 | `DISCORD__MAX_RESULTS`        | `:discord/max-results`     | Integer | `25`          | Sets the maximum size of the search results selection                                               |
-| `DISCORD__ROLE_ID`            | `:discord/role-id`         | String  | N/A           | The discord role id for users of the bot (omitting this lets everyone on the server use the bot)    |
+| `DISCORD__ROLE_ID`            | `:discord/role-id`         | Long    | N/A           | The discord role id for users of the bot (omitting this lets everyone on the server use the bot)    |
 | `SONARR__QUALITY_PROFILE`     | `:sonarr/quality-profile`  | String  | N/A           | The name of the quality profile to use by default for Sonarr                                        |
 | `RADARR__QUALITY_PROFILE`     | `:radarr/quality-profile`  | String  | N/A           | The name of the quality profile to use by default for Radarr                                        |
 | `SONARR__LANGUAGE_PROFILE`    | `:sonarr/language-profile` | String  | N/A           | The name of the language profile to use by default for Radarr                                       |
