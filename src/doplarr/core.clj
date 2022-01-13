@@ -47,7 +47,8 @@
         messaging (:messaging @state/discord)
         bot-id (:bot-id @state/discord)
         [{command-id :id}] (discord/register-commands media-types bot-id messaging id)]
-    (when (:role-id env)
+    (when (:discord/role-id env)
+      (info "Setting role id. Reminder, even the server owner needs this role.")
       (discord/set-permission bot-id messaging id command-id))))
 
 (defmethod handle-event! :default

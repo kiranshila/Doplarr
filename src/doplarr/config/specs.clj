@@ -20,7 +20,7 @@
 
 ;  --- Optional settings
 (spec/def ::log-level keyword?)
-(spec/def :discord/role-id string?)
+(spec/def :discord/role-id int?)
 (spec/def :discord/max-results #(and (pos-int? %)
                                      (<= % 25)))
 

@@ -12,7 +12,7 @@
 (defn request-command [media-types]
   {:name "request"
    :description "Request media"
-   :default_permission (boolean (not (:role-id env)))
+   :default_permission (boolean (not (:discord/role-id env)))
    :options
    (into [] (for [media media-types]
               {:type 1
@@ -148,5 +148,5 @@
 (defn set-permission [bot-id messaging guild-id command-id]
   (->> @(m/edit-application-command-permissions!
          messaging bot-id guild-id command-id
-         [{:id (:role-id env) :type 1 :permission true}])
+         [{:id (:discord/role-id env) :type 1 :permission true}])
        (else #(fatal % "Error in setting command permissions"))))

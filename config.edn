@@ -10,7 +10,7 @@
  ; :sonarr/quality-profile ""
  ; :radarr/quality-profile ""
  ; :sonarrr/language-profile ""
- ; :discord/role-id ""
+ ; :discord/role-id role_id
  ; :discord/max-results 10
  ; :overseerr/default-id 1
  ; :log-level :trace
