@@ -54,6 +54,7 @@
       (do
         (fatal "Error in  configuration")
         (expound/expound ::specs/config (redact-secrets config))
+        (flush)
         (System/exit -1)))
     config))
 
