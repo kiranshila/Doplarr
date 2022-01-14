@@ -1,11 +1,11 @@
 (ns doplarr.backends.radarr.impl
   (:require
-   [config.core :refer [env]]
-   [doplarr.utils :as utils]
-   [clojure.core.async :as a]))
+   [clojure.core.async :as a]
+   [doplarr.state :as state]
+   [doplarr.utils :as utils]))
 
-(def base-url (delay (str (:radarr/url env) "/api/v3")))
-(def api-key  (delay (:radarr/api env)))
+(def base-url (delay (str (:radarr/url @state/config) "/api/v3")))
+(def api-key  (delay (:radarr/api @state/config)))
 
 (defn GET [endpoint & [params]]
   (utils/http-request :get (str @base-url endpoint) @api-key params))

@@ -1,13 +1,13 @@
 (ns doplarr.utils
   (:require
-   [taoensso.timbre :refer [fatal]]
    [camel-snake-kebab.core :as csk]
    [camel-snake-kebab.extras :as cske]
    [clojure.core.async :as a]
-   [fmnoise.flow :as flow :refer [then else]]
-   [hato.client :as hc]
    [clojure.string :as str]
-   [doplarr.config :as config]))
+   [doplarr.config :as config]
+   [fmnoise.flow :as flow :refer [else then]]
+   [hato.client :as hc]
+   [taoensso.timbre :refer [fatal]]))
 
 (defn deep-merge [a & maps]
   (if (map? a)

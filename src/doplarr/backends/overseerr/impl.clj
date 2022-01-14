@@ -1,15 +1,15 @@
 (ns doplarr.backends.overseerr.impl
   (:require
-   [taoensso.timbre :refer [fatal]]
-   [com.rpl.specter :as s]
    [clojure.core.async :as a]
-   [config.core :refer [env]]
-   [fmnoise.flow :as flow :refer [then else]]
+   [clojure.set :as set]
+   [com.rpl.specter :as s]
+   [doplarr.state :as state]
    [doplarr.utils :as utils]
-   [clojure.set :as set]))
+   [fmnoise.flow :as flow :refer [else then]]
+   [taoensso.timbre :refer [fatal]]))
 
-(def base-url (delay (str (:overseerr/url env) "/api/v1")))
-(def api-key  (delay (:overseerr/api env)))
+(def base-url (delay (str (:overseerr/url @state/config) "/api/v1")))
+(def api-key  (delay (:overseerr/api @state/config)))
 
 (def poster-path "https://image.tmdb.org/t/p/w500")
 

@@ -1,15 +1,14 @@
 (ns doplarr.interaction-state-machine
   (:require
-   [config.core :refer [env]]
-   [doplarr.discord :as discord]
-   [taoensso.timbre :refer [info fatal]]
    [clojure.core.async :as a]
-   [com.rpl.specter :as s]
-   [fmnoise.flow :refer [then else]]
-   [discljord.messaging :as m]
    [clojure.string :as str]
+   [com.rpl.specter :as s]
+   [discljord.messaging :as m]
+   [doplarr.discord :as discord]
    [doplarr.state :as state]
-   [doplarr.utils :as utils :refer [log-on-error]]))
+   [doplarr.utils :as utils :refer [log-on-error]]
+   [fmnoise.flow :refer [else then]]
+   [taoensso.timbre :refer [fatal info]]))
 
 (def channel-timeout 600000)
 
@@ -30,7 +29,7 @@
       (let [results (->> (log-on-error
                           (a/<! ((utils/media-fn media-type "search") query media-type))
                           "Exception from search")
-                         (then #(->> (take (:max-results env discord/MAX-OPTIONS) %)
+                         (then #(->> (take (:max-results @state/config discord/MAX-OPTIONS) %)
                                      (into []))))]
                                         ; Setup ttl cache entry
         (swap! state/cache assoc uuid {:results results

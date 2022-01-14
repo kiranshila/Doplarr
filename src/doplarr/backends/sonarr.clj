@@ -1,11 +1,11 @@
 (ns doplarr.backends.sonarr
   (:require
-   [taoensso.timbre :refer [warn]]
-   [config.core :refer [env]]
+   [clojure.core.async :as a]
+   [doplarr.backends.sonarr.impl :as impl]
+   [doplarr.state :as state]
    [doplarr.utils :as utils]
    [fmnoise.flow :refer [then]]
-   [doplarr.backends.sonarr.impl :as impl]
-   [clojure.core.async :as a]))
+   [taoensso.timbre :refer [warn]]))
 
 (defn search [term _]
   (utils/request-and-process-body
@@ -25,7 +25,7 @@
                                (hash-map :id ssn :name (str ssn)))))
           {:keys [sonarr/language-profile
                   sonarr/quality-profile
-                  partial-seasons]} env
+                  partial-seasons]} @state/config
           default-profile-id (utils/profile-name-id quality-profiles quality-profile)
           default-language-id (utils/profile-name-id language-profiles language-profile)]
       (when (and quality-profile (nil? default-profile-id))
