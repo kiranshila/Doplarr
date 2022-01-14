@@ -1,12 +1,12 @@
 (ns doplarr.backends.sonarr.impl
   (:require
    [clojure.core.async :as a]
-   [config.core :refer [env]]
-   [fmnoise.flow :as flow :refer [then]]
-   [doplarr.utils :as utils]))
+   [doplarr.state :as state]
+   [doplarr.utils :as utils]
+   [fmnoise.flow :as flow :refer [then]]))
 
-(def base-url (delay (str (:sonarr/url env) "/api/v3")))
-(def api-key  (delay (:sonarr/api env)))
+(def base-url (delay (str (:sonarr/url @state/config) "/api/v3")))
+(def api-key  (delay (:sonarr/api @state/config)))
 
 (defn GET [endpoint & [params]]
   (utils/http-request :get (str @base-url endpoint) @api-key params))

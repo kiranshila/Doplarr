@@ -5,3 +5,5 @@
 (def cache (cache/ttl-cache-factory {} :ttl 900000))
 
 (def discord (atom nil))
+
+(def config (atom nil))

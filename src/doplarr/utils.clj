@@ -1,13 +1,14 @@
 (ns doplarr.utils
   (:require
-   [taoensso.timbre :refer [fatal]]
    [camel-snake-kebab.core :as csk]
    [camel-snake-kebab.extras :as cske]
    [clojure.core.async :as a]
-   [fmnoise.flow :as flow :refer [then else]]
-   [hato.client :as hc]
    [clojure.string :as str]
-   [doplarr.config :as config]))
+   [doplarr.config :as config]
+   [doplarr.state :as state]
+   [fmnoise.flow :as flow :refer [else then]]
+   [hato.client :as hc]
+   [taoensso.timbre :refer [fatal]]))
 
 (defn deep-merge [a & maps]
   (if (map? a)
@@ -74,8 +75,7 @@
   "Resolves a function `f` in the backend namespace matching the available backend for a given `media`"
   [media f]
   (requiring-resolve
-   (symbol (str "doplarr.backends." (name (config/available-backed-for-media
-                                           media)))
+   (symbol (str "doplarr.backends." (name (config/available-backend-for-media media @state/config)))
            f)))
 
 (defmacro log-on-error [expr msg]

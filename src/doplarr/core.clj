@@ -1,22 +1,20 @@
 (ns doplarr.core
   (:require
-   [taoensso.timbre :refer [info fatal debug] :as timbre]
-   [taoensso.timbre.tools.logging :as tlog]
+   [clojure.core.async :as a]
+   [config.core :refer [load-env]]
    [discljord.connections :as c]
-   [discljord.messaging :as m]
    [discljord.events :as e]
-   [config.core :refer [env]]
+   [discljord.messaging :as m]
    [doplarr.config :as config]
-   [doplarr.state :as state]
-   [doplarr.interaction-state-machine :as ism]
    [doplarr.discord :as discord]
-   [clojure.core.async :as a])
+   [doplarr.interaction-state-machine :as ism]
+   [doplarr.state :as state]
+   [taoensso.timbre :refer [debug fatal info] :as timbre]
+   [taoensso.timbre.tools.logging :as tlog])
   (:gen-class))
 
 ; Pipe tools.logging to timbre
 (tlog/use-timbre)
-
-(timbre/merge-config! {:min-level [[#{"*"} (:log-level env :info)]]})
 
 ; Multimethod for handling incoming Discord events
 (defmulti handle-event!
@@ -43,11 +41,11 @@
 (defmethod handle-event! :guild-create
   [_ {:keys [id]}]
   (info "Connected to guild")
-  (let [media-types (config/available-media)
+  (let [media-types (config/available-media @state/config)
         messaging (:messaging @state/discord)
         bot-id (:bot-id @state/discord)
         [{command-id :id}] (discord/register-commands media-types bot-id messaging id)]
-    (when (:discord/role-id env)
+    (when (:discord/role-id @state/config)
       (info "Setting role id. Reminder, even the server owner needs this role.")
       (discord/set-permission bot-id messaging id command-id))))
 
@@ -57,7 +55,7 @@
 
 (defn start-bot! []
   (let [event-ch (a/chan 100)
-        token (:discord/token env)
+        token (:discord/token @state/config)
         connection-ch (c/connect-bot! token event-ch :intents #{:guilds})
         messaging-ch (m/start-connection! token)
         init-state {:connection connection-ch
@@ -70,9 +68,13 @@
            (m/stop-connection! messaging-ch)
            (a/close!           event-ch)))))
 
+(defn startup! []
+  (reset! state/config (config/valid-config (load-env)))
+  (timbre/merge-config! {:min-level [[#{"*"} (:log-level @state/config :info)]]})
+  (start-bot!))
+
 ; Program Entry Point
 (defn -main
   [& _]
-  (config/validate-config)
-  (start-bot!)
+  (startup!)
   (shutdown-agents))

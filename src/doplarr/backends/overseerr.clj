@@ -1,9 +1,9 @@
 (ns doplarr.backends.overseerr
   (:require
+   [clojure.core.async :as a]
    [doplarr.backends.overseerr.impl :as impl]
-   [doplarr.utils :as utils]
-   [config.core :refer [env]]
-   [clojure.core.async :as a]))
+   [doplarr.state :as state]
+   [doplarr.utils :as utils]))
 
 (defn search [term media-type]
   (let [type (impl/media-type media-type)]
@@ -17,7 +17,7 @@
 (defn additional-options [result media-type]
   (a/go
     (let [details (a/<! (impl/details (:id result) media-type))
-          {:keys [partial-seasons]} env]
+          {:keys [partial-seasons]} @state/config]
       (when (= media-type :series)
         (let [seasons (impl/seasons-list details)
               backend-partial-seasons? (a/<! (impl/partial-seasons?))]
@@ -42,7 +42,7 @@
 (defn request [payload media-type]
   (a/go
     (let [{:keys [format id season season-count discord-id]} payload
-          {:overseerr/keys [default-id]} env
+          {:overseerr/keys [default-id]} @state/config
           details (a/<! (impl/details id media-type))
           ovsr-id ((a/<! (impl/discord-users)) discord-id)
           status (impl/media-status details media-type

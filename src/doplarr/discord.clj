@@ -1,18 +1,18 @@
 (ns doplarr.discord
   (:require
-   [config.core :refer [env]]
-   [com.rpl.specter :as s]
+   [clojure.set :as set]
    [clojure.string :as str]
-   [taoensso.timbre :refer [fatal]]
+   [com.rpl.specter :as s]
+   [discljord.messaging :as m]
+   [doplarr.state :as state]
    [doplarr.utils :as utils]
    [fmnoise.flow :as flow :refer [else]]
-   [discljord.messaging :as m]
-   [clojure.set :as set]))
+   [taoensso.timbre :refer [fatal]]))
 
 (defn request-command [media-types]
   {:name "request"
    :description "Request media"
-   :default_permission (boolean (not (:discord/role-id env)))
+   :default_permission (boolean (not (:discord/role-id @state/config)))
    :options
    (into [] (for [media media-types]
               {:type 1
@@ -148,5 +148,5 @@
 (defn set-permission [bot-id messaging guild-id command-id]
   (->> @(m/edit-application-command-permissions!
          messaging bot-id guild-id command-id
-         [{:id (:discord/role-id env) :type 1 :permission true}])
+         [{:id (:discord/role-id @state/config) :type 1 :permission true}])
        (else #(fatal % "Error in setting command permissions"))))

@@ -1,11 +1,11 @@
 (ns doplarr.backends.radarr
   (:require
-   [taoensso.timbre :refer [warn]]
-   [config.core :refer [env]]
-   [fmnoise.flow :refer [then]]
-   [doplarr.utils :as utils]
+   [clojure.core.async :as a]
    [doplarr.backends.radarr.impl :as impl]
-   [clojure.core.async :as a]))
+   [doplarr.state :as state]
+   [doplarr.utils :as utils]
+   [fmnoise.flow :refer [then]]
+   [taoensso.timbre :refer [warn]]))
 
 (defn search [term _]
   (utils/request-and-process-body
@@ -17,7 +17,7 @@
 (defn additional-options [_ _]
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
-          {:keys [radarr/quality-profile]} env
+          {:keys [radarr/quality-profile]} @state/config
           default-profile-id (utils/profile-name-id quality-profiles quality-profile)]
       (when (and quality-profile (nil? default-profile-id))
         (warn "Default quality profile in config doesn't exist in backend, check spelling"))
