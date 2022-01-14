@@ -29,6 +29,14 @@
     :partial-seasons
     :log-level})
 
+(defn trimr* [s c]
+  (loop [index (.length s)]
+    (if (zero? index)
+      ""
+      (if (= c (.charAt s (unchecked-dec index)))
+        (recur (unchecked-dec index))
+        (.. s (subSequence 0 index) toString)))))
+
 (def redacted-str "REDACTED")
 
 (defn assoc-present [m k v]
@@ -47,7 +55,8 @@
 (defn valid-config [env]
   (let [config (s/select-one
                 [(s/submap valid-keys)
-                 (s/transformed [s/MAP-VALS nil?] (constantly s/NONE))]
+                 (s/transformed [s/MAP-VALS nil?] (constantly s/NONE))
+                 (s/transformed [s/ALL #(= "url" (name (first %)))] #(vector (first %) (trimr* (second %) \/)))]
                 env)]
     (if (spec/valid? ::specs/config config)
       (info "Configuration is valid")

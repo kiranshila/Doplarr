@@ -43,7 +43,8 @@
   `(when-req #(some (partial contains? %) ~(vec ks)) (spec/keys :req ~(vec ks))))
 
 (spec/def ::has-backend #(some (partial contains? %) [:sonarr/url :radarr/url :overseerr/url]))
-(expound/defmsg ::has-backend "config must contain at least one of the following backends: sonarr, radarr, overseerr\nIf you have configured one, make sure to check spelling")
+(expound/defmsg ::has-backend "config must contain at least one of the following backends: sonarr, radarr, overseerr
+If you have configured one, make sure to check spelling. A valid configuration contains both the api key and url")
 
 ; Complete configuration
 (spec/def ::config (spec/and
