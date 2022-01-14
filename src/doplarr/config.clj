@@ -53,7 +53,8 @@
       (info "Configuration is valid")
       (do
         (fatal "Error in  configuration")
-        (expound/expound ::specs/config (redact-secrets config))))
+        (expound/expound ::specs/config (redact-secrets config))
+        (System/exit -1)))
     config))
 
 (def backend-media {:radarr [:movie]
