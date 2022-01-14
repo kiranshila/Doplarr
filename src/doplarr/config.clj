@@ -92,7 +92,7 @@
 (defn available-media [env]
   (into #{} (flatten (map backend-media (available-backends env)))))
 
-(defn available-backed-for-media [media env]
+(defn available-backend-for-media [media env]
   (first
    (set/intersection
     (available-backends env)

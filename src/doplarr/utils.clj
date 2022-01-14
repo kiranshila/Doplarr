@@ -5,6 +5,7 @@
    [clojure.core.async :as a]
    [clojure.string :as str]
    [doplarr.config :as config]
+   [doplarr.state :as state]
    [fmnoise.flow :as flow :refer [else then]]
    [hato.client :as hc]
    [taoensso.timbre :refer [fatal]]))
@@ -74,8 +75,7 @@
   "Resolves a function `f` in the backend namespace matching the available backend for a given `media`"
   [media f]
   (requiring-resolve
-   (symbol (str "doplarr.backends." (name (config/available-backed-for-media
-                                           media)))
+   (symbol (str "doplarr.backends." (name (config/available-backend-for-media media @state/config)))
            f)))
 
 (defmacro log-on-error [expr msg]
