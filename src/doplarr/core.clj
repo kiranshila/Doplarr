@@ -70,6 +70,7 @@
 
 (defn startup! []
   (reset! state/config (config/valid-config (load-env)))
+  (timbre/merge-config! {:min-level [[#{"*"} (:log-level @state/config :info)]]})
   (start-bot!))
 
 ; Program Entry Point
