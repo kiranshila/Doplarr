@@ -1,13 +1,13 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/logos/logo_title.png" width="200">
+  <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/logos/logo_title.png" width="350">
 </p>
 
 </p>
 <p align="center">
 <img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/kiranshila/doplarr/Main?style=for-the-badge">
 <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/kiranshila/doplarr?style=for-the-badge">
-<img alt="Code" src="https://img.shields.io/badge/code-data-blueviolet?style=for-the-badge">
 <img alt="Discord" src="https://img.shields.io/discord/890634173751119882?color=ff69b4&label=discord&style=for-the-badge">
+<img alt="Code" src="https://img.shields.io/badge/code-data-blueviolet?style=for-the-badge">
 </p>
 
 > An \*arr Request Bot for Discord
