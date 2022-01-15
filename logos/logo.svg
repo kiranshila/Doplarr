@@ -28,15 +28,15 @@
      showgrid="false"
      height="100mm"
      scale-x="1"
-     inkscape:zoom="0.84730922"
-     inkscape:cx="-86.745191"
-     inkscape:cy="462.05091"
+     inkscape:zoom="0.97213405"
+     inkscape:cx="261.79517"
+     inkscape:cy="523.07601"
      inkscape:window-width="1758"
      inkscape:window-height="1350"
      inkscape:window-x="3338"
      inkscape:window-y="66"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="text1822" />
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -82,17 +82,14 @@
        id="path21612"
        style="fill:#fffffe;stroke:#000000;stroke-width:0.264583"
        d="M 50.0178,51.760883 A 0.01779476,0.01779476 0 0 1 50,51.778673 0.01779476,0.01779476 0 0 1 49.9822,51.760883 0.01779476,0.01779476 0 0 1 50,51.743093 a 0.01779476,0.01779476 0 0 1 0.0178,0.01779 z" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:47.894px;line-height:1.25;font-family:Impact;-inkscape-font-specification:Impact;fill:#7289da;fill-opacity:1;stroke-width:1.19735"
-       x="38.388977"
-       y="68.802139"
-       id="text24934"><tspan
-         sodipodi:role="line"
-         id="tspan24932"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Impact;-inkscape-font-specification:Impact;fill:#7289da;fill-opacity:1;stroke-width:1.19735"
-         x="38.388977"
-         y="68.802139">λ</tspan></text>
+    <g
+       aria-label="λ"
+       id="text24934"
+       style="font-size:47.894px;line-height:1.25;font-family:Impact;-inkscape-font-specification:Impact;fill:#7289da;stroke-width:1.19735">
+      <path
+         d="m 38.342206,68.802139 5.168249,-28.50722 q 0.3274,-1.824088 0.3274,-3.016761 0,-1.473302 -1.941017,-1.473302 h -1.26283 v -4.88762 h 5.752893 q 4.770692,0 6.852023,1.052359 2.081331,1.052358 2.806289,3.507861 0.748344,2.432117 1.356373,8.325324 l 1.870859,17.773165 q 0.140315,1.520073 0.420944,1.870859 0.304014,0.327401 0.724958,0.327401 0.350786,0 1.239444,-0.04677 v 5.027935 q -2.736132,0.3274 -5.402107,0.3274 -4.560219,0 -4.934391,-5.355335 L 50.035077,45.322854 46.924773,68.802139 Z"
+         id="path2772" />
+    </g>
     <g
        aria-label="("
        id="text16135"
@@ -104,16 +101,31 @@
          id="path20161"
          inkscape:original-d="m 28.682452,89.464201 v 1.62327 Q 22.057755,87.753186 17.626666,83.278225 11.309074,76.916761 7.8870448,68.273944 4.4650158,59.631127 4.4650158,50.330228 q 0,-13.600371 6.7124412,-24.787774 Q 17.889899,14.31118 28.682452,9.4852406 v 1.8426314 q -5.396277,2.983308 -8.862178,8.160223 -3.465901,5.176916 -5.176916,13.117778 -1.711014,7.940862 -1.711014,16.583679 0,9.388643 1.447781,17.066273 1.140677,6.054359 2.763947,9.695748 1.62327,3.685262 4.343344,7.063419 2.763947,3.378157 7.195036,6.449209 z" />
     </g>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:44.9694px;line-height:1.25;font-family:'Uni Sans';-inkscape-font-specification:'Uni Sans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#7289da;fill-opacity:1;stroke-width:1.12424"
-       x="-50.371716"
-       y="143.76521"
-       id="text1822"><tspan
-         sodipodi:role="line"
-         id="tspan1820"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:44.9694px;font-family:'Uni Sans';-inkscape-font-specification:'Uni Sans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#7289da;fill-opacity:1;stroke-width:1.12424"
-         x="-50.371716"
-         y="143.76521">DOPLARR</tspan></text>
+    <g
+       aria-label="DOPLARR"
+       id="text1822"
+       style="font-size:44.9694px;line-height:1.25;font-family:'Uni Sans';-inkscape-font-specification:'Uni Sans, Normal';fill:#7289da;stroke-width:1.12424">
+      <path
+         d="m -47.853429,111.92688 v 31.83833 h 11.91689 c 6.385655,0.045 12.366585,-3.14785 12.366585,-10.47787 v -10.70271 c 0,-7.41995 -5.98093,-10.65775 -12.366585,-10.65775 z m 8.094491,24.28347 v -16.77358 h 4.092216 c 2.698164,0 4.002276,1.30411 4.002276,3.3727 v 9.93824 c 0,2.06859 -1.259143,3.46264 -4.002276,3.46264 z"
+         id="path1995" />
+      <path
+         d="m -20.017386,133.28734 c 0,7.28505 6.610502,10.92757 13.2210031,10.92757 6.61050163,0 13.1760338,-3.64252 13.1760338,-10.92757 v -10.88259 c 0,-7.28504 -6.61050157,-10.92757 -13.2210031,-10.92757 -6.6105018,0 -13.1760338,3.59756 -13.1760338,10.92757 z m 8.049522,-10.88259 c 0,-2.33841 2.5182866,-3.59755 5.036573,-3.59755 2.6082251,0 5.2614196,1.12423 5.2614196,3.59755 v 10.88259 c 0,2.29344 -2.5632557,3.46265 -5.1265115,3.46265 -2.5632557,0 -5.1714811,-1.12424 -5.1714811,-3.46265 z"
+         id="path1997" />
+      <path
+         d="m 10.651785,143.76521 h 8.049523 v -9.30866 h 4.721787 c 7.689767,0 11.602104,-5.62118 11.602104,-11.28732 0,-5.62118 -3.867368,-11.24235 -11.647074,-11.24235 h -12.72634 z m 8.049523,-16.4588 v -7.86964 h 4.676817 c 4.856695,-0.045 4.856695,7.91461 0,7.86964 z"
+         id="path1999" />
+      <path
+         d="m 38.442874,143.76521 h 21.045678 v -7.95958 H 46.537365 v -23.87875 h -8.094491 z"
+         id="path2001" />
+      <path
+         d="M 78.330711,111.92688 H 71.0007 l -11.107442,31.83833 h 8.634125 l 1.978653,-6.38565 h 8.499216 l 2.068593,6.38565 h 8.634124 z m -6.025899,18.30254 2.338409,-9.30866 h 0.224847 l 2.2035,9.30866 z"
+         id="path2003" />
+      <path
+         d="m 108.77502,143.76521 h 10.02818 l -8.6791,-10.92756 c 3.86737,-1.21417 6.25075,-4.54191 6.25075,-10.4329 -0.17988,-7.46492 -5.26142,-10.47787 -11.82695,-10.47787 H 91.821559 v 31.83833 H 99.96102 V 133.6471 h 1.43902 z m -8.814,-17.0434 v -7.28504 h 4.72179 c 5.08154,0 5.08154,7.28504 0,7.28504 z"
+         id="path2005" />
+      <path
+         d="m 137.82525,143.76521 h 10.02818 l -8.67909,-10.92756 c 3.86736,-1.21417 6.25074,-4.54191 6.25074,-10.4329 -0.17988,-7.46492 -5.26142,-10.47787 -11.82695,-10.47787 h -12.72634 v 31.83833 h 8.13946 V 133.6471 h 1.43902 z m -8.814,-17.0434 v -7.28504 h 4.72179 c 5.08154,0 5.08154,7.28504 0,7.28504 z"
+         id="path2007" />
+    </g>
   </g>
 </svg>
