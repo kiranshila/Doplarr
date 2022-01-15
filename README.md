@@ -49,6 +49,10 @@ you copied is correct.
 
 Yes! [here](https://discord.gg/884mGq2fV6)
 
+#### This is super useful! Can I buy you a beer?
+
+Yes, you're too kind! There is a Github sponsor link off to the side.
+
 ## Setup
 
 Please read all of this setup carefully. Most problems in deployment come from missing a step.
