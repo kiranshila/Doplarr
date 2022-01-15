@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/logos/logo_cropped.png" width="200">
+  <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/logos/logo_title.png" width="200">
 </p>
 
 </p>
