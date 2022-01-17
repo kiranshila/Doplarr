@@ -138,6 +138,16 @@
    :components [{:type 1 :components (for [format (:request-formats embed-data)]
                                        (request-button format uuid))}]})
 
+(defn request-performed-plain [payload media-type user-id]
+  {:content
+   (str "<@" user-id "> has requested the "
+        (name media-type) " `" (:title payload) " (" (:year payload) ")"
+        "` and it should be available soon!")})
+
+(defn request-performed-embed [embed-data user-id]
+  {:content (str "<@" user-id "> has requested:")
+   :embeds [(request-embed embed-data)]})
+
 ;; Discljord Utilities
 (defn register-commands [media-types bot-id messaging guild-id]
   (->> @(m/bulk-overwrite-guild-application-commands!

@@ -48,6 +48,7 @@
         (let [embed (log-on-error
                      (a/<! ((utils/media-fn media-type "request-embed") payload media-type))
                      "Exception from request-embed")]
+          (swap! state/cache assoc-in [uuid :embed] embed)
           (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/request embed uuid))
                (else #(fatal % "Error in sending request embed"))))
         (let [[op options] (first pending-opts)]
@@ -92,7 +93,7 @@
 
 (defmethod process-event! "request" [_ interaction uuid format]
   (let [{:keys [messaging bot-id]} @state/discord
-        {:keys [payload media-type token]} (get @state/cache uuid)
+        {:keys [payload media-type token embed]} (get @state/cache uuid)
         {:keys [user-id channel-id]} interaction]
     (letfn [(msg-resp [msg] (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/content-response msg))
                                  (else #(fatal % "Error in message response"))))]
@@ -109,12 +110,10 @@
                       :available (msg-resp "This selection is already available!")
                       (do
                         (info "Performing request for " payload)
-                        (m/create-message! messaging channel-id
-                                           :content
-                                           (str "<@" user-id "> has requested the "
-                                                (name media-type) " `" (:title payload) " (" (:year payload) ")"
-                                                "` and it should be available soon!"))
-                        (msg-resp "Request performed!")))))
+                        (msg-resp "Request performed!")
+                        (case (:discord/requested-msg-style @state/config)
+                          :plain (m/create-message! messaging channel-id (discord/request-performed-plain payload media-type user-id))
+                          :embed (m/create-message! messaging channel-id (discord/request-performed-embed embed user-id)))))))
             (else (fn [e]
                     (let [{:keys [status body] :as data} (ex-data e)]
                       (if (= status 403)
