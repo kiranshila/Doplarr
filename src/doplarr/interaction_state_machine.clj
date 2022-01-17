@@ -112,8 +112,9 @@
                         (info "Performing request for " payload)
                         (msg-resp "Request performed!")
                         (case (:discord/requested-msg-style @state/config)
-                          :plain (m/create-message! messaging channel-id (discord/request-performed-plain payload media-type user-id))
-                          :embed (m/create-message! messaging channel-id (discord/request-performed-embed embed user-id)))))))
+                          :none nil
+                          :embed (m/create-message! messaging channel-id (discord/request-performed-embed embed user-id))
+                          (m/create-message! messaging channel-id (discord/request-performed-plain payload media-type user-id)))))))
             (else (fn [e]
                     (let [{:keys [status body] :as data} (ex-data e)]
                       (if (= status 403)
