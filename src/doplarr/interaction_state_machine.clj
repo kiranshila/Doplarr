@@ -116,12 +116,12 @@
                           :embed (m/create-message! messaging channel-id (discord/request-performed-embed embed user-id))
                           (m/create-message! messaging channel-id (discord/request-performed-plain payload media-type user-id)))))))
             (else (fn [e]
-                    (let [{:keys [status body] :as data} (ex-data e)]
+                    (let [{:keys [status body]} (ex-data e)]
                       (if (= status 403)
                         (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/content-response (body "message")))
                              (else #(fatal % "Error in sending request failure response")))
                         (->> @(m/edit-original-interaction-response! messaging bot-id token (discord/content-response "Unspecified error on request, check logs"))
-                             (then #(fatal data "Non 403 error on request"))
+                             (then #(fatal % "Non 403 error on request"))
                              (else #(fatal % "Error in sending error response")))))))))))
 
 (defn continue-interaction! [interaction]
