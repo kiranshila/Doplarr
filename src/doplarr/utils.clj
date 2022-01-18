@@ -8,7 +8,7 @@
    [doplarr.state :as state]
    [fmnoise.flow :as flow :refer [else then]]
    [hato.client :as hc]
-   [taoensso.timbre :refer [fatal]]))
+   [taoensso.timbre :refer [fatal trace]]))
 
 (defn deep-merge [a & maps]
   (if (map? a)
@@ -18,6 +18,7 @@
 (defn http-request [method url key & [params]]
   (let [chan (a/promise-chan)
         put (partial a/put! chan)]
+    (trace "Performing HTTP request" method url params)
     (hc/request
      (deep-merge
       {:method method
