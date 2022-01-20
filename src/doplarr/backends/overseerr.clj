@@ -26,7 +26,7 @@
                      (false? partial-seasons) -1
                      (false? backend-partial-seasons?) -1
                      :else (impl/seasons-list details))
-           :season-count (count seasons)})))))
+           :season-count (dec (count seasons))})))))
 
 (defn request-embed [{:keys [title id season]} media-type]
   (a/go
