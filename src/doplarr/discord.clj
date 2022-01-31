@@ -140,9 +140,9 @@
 
 (defn request-performed-plain [payload media-type user-id]
   {:content
-   (str "<@" user-id "> has requested the "
+   (str "<@" user-id "> your request for the "
         (name media-type) " `" (:title payload) " (" (:year payload) ")"
-        "` and it should be available soon!")})
+        "` has been received!")})
 
 (defn request-performed-embed [embed-data user-id]
   {:content (str "<@" user-id "> has requested:")
