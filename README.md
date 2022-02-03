@@ -118,14 +118,14 @@ Alternatively, use docker-compose:
 
 ```yaml
 doplarr:
-  environment:
-    - SONARR__URL='http://localhost:8989’
-    - RADARR__URL='http://localhost:7878’
+  environment
+    - SONARR__URL='http://localhost:8989'
+    - RADARR__URL='http://localhost:7878'
     - SONARR__API=sonarr_api
     - RADARR__API=radarr_api
     - DISCORD__TOKEN=bot_token
   container_name: doplarr
-  image: ‘ghcr.io/kiranshila/doplarr:latest’
+  image: 'ghcr.io/kiranshila/doplarr:latest'
 ```
 
 ## Building and Running Locally
