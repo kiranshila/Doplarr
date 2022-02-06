@@ -68,9 +68,12 @@
            (m/stop-connection! messaging-ch)
            (a/close!           event-ch)))))
 
-(defn startup! []
+(defn setup-config! []
   (reset! state/config (config/valid-config (load-env)))
-  (timbre/merge-config! {:min-level [[#{"*"} (:log-level @state/config :info)]]})
+  (timbre/merge-config! {:min-level [[#{"*"} (:log-level @state/config :info)]]}))
+
+(defn startup! []
+  (setup-config!)
   (start-bot!))
 
 ; Program Entry Point

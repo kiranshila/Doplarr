@@ -8,7 +8,8 @@
    [doplarr.state :as state]
    [fmnoise.flow :as flow :refer [else then]]
    [hato.client :as hc]
-   [taoensso.timbre :refer [fatal trace]]))
+   [taoensso.timbre :refer [fatal trace]]
+   [clojure.set :as set]))
 
 (defn deep-merge [a & maps]
   (if (map? a)
@@ -47,21 +48,30 @@
   (->> (select-keys profile ["id" "name"])
        from-camel))
 
-(defn profile-name-id [profiles name]
+(defn id-from-name [profiles name]
   (->> profiles
        (filter #(= name (:name %)))
        first
        :id))
 
-(defn profile-id-name [profiles id]
+(defn name-from-id [profiles id]
   (->> profiles
        (filter #(= id (:id %)))
        first
        :name))
 
+(defmacro log-on-error [expr msg]
+  `(try
+     ~expr
+     (catch Exception e#
+       (fatal e# ~msg)
+       (throw e#))))
+
 (defn request-and-process-body [request-fn process-fn & request-args]
   (a/go
-    (->> (a/<! (apply request-fn request-args))
+    (->> (log-on-error
+          (a/<! (apply request-fn request-args))
+          "Exception from HTTP request")
          (then #(process-fn (:body %)))
          (else #(fatal %)))))
 
@@ -79,9 +89,12 @@
    (symbol (str "doplarr.backends." (name (config/available-backend-for-media media @state/config)))
            f)))
 
-(defmacro log-on-error [expr msg]
-  `(try
-     ~expr
-     (catch Exception e#
-       (fatal e# ~msg)
-       (throw e#))))
+(defn process-rootfolders [resp]
+  (->> (from-camel resp)
+       (map #(select-keys % #{:path :id}))
+       (map #(set/rename-keys % {:path :name}))))
+
+(defn process-tags [resp]
+  (->> (from-camel resp)
+       (map #(set/rename-keys % {:label :name}))
+       (#(conj % {:name "No Tag" :id -1}))))

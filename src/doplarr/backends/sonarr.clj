@@ -18,6 +18,7 @@
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
           language-profiles (a/<! (impl/language-profiles))
+          rootfolders (a/<! (impl/rootfolders))
           details (a/<! (impl/get-from-tvdb (:tvdb-id result)))
           seasons (->> (:seasons details)
                        (filter #(pos? (:season-number %)))
@@ -26,8 +27,8 @@
           {:keys [sonarr/language-profile
                   sonarr/quality-profile
                   partial-seasons]} @state/config
-          default-profile-id (utils/profile-name-id quality-profiles quality-profile)
-          default-language-id (utils/profile-name-id language-profiles language-profile)]
+          default-profile-id (utils/id-from-name quality-profiles quality-profile)
+          default-language-id (utils/id-from-name language-profiles language-profile)]
       (when (and quality-profile (nil? default-profile-id))
         (warn "Default quality profile in config doesn't exist in backend, check spelling"))
       (when (and language-profile (nil? default-language-id))
@@ -43,11 +44,15 @@
        :language-profile-id (cond
                               language-profile default-language-id
                               (= 1 (count language-profiles)) (:id (first language-profiles))
-                              :else language-profiles)})))
+                              :else language-profiles)
+       :rootfolder-id (cond
+                        (= 1 (count rootfolders)) (:id (first rootfolders))
+                        :else rootfolders)})))
 
-(defn request-embed [{:keys [title quality-profile-id language-profile-id tvdb-id season]} _]
+(defn request-embed [{:keys [title quality-profile-id language-profile-id tvdb-id season rootfolder-id]} _]
   (a/go
-    (let [quality-profiles (a/<! (impl/quality-profiles))
+    (let [rootfolders (a/<! (impl/rootfolders))
+          quality-profiles (a/<! (impl/quality-profiles))
           language-profiles (a/<! (impl/language-profiles))
           details (a/<! (impl/get-from-tvdb tvdb-id))]
       {:title title
@@ -57,13 +62,16 @@
        :season season
        :request-formats [""]
        :quality-profile (:name (first (filter #(= quality-profile-id (:id %)) quality-profiles)))
-       :language-profile (:name (first (filter #(= language-profile-id (:id %)) language-profiles)))})))
+       :language-profile (:name (first (filter #(= language-profile-id (:id %)) language-profiles)))
+       :rootfolder (utils/name-from-id rootfolders rootfolder-id)})))
 
 (defn request [payload _]
   (a/go (let [details  (a/<! (if-let [id (:id payload)]
                                (impl/get-from-id id)
                                (impl/get-from-tvdb (:tvdb-id payload))))
               status (impl/status details (:season payload))
+              rfs (a/<! (impl/rootfolders))
+              payload (assoc payload :root-folder-path (utils/name-from-id rfs (:rootfolder-id payload)))
               request-payload (impl/request-payload payload details)]
           (if status
             status
