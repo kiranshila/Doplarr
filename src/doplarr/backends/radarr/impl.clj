@@ -1,6 +1,5 @@
 (ns doplarr.backends.radarr.impl
   (:require
-   [clojure.core.async :as a]
    [doplarr.state :as state]
    [doplarr.utils :as utils]))
 
@@ -13,13 +12,23 @@
 (defn POST [endpoint & [params]]
   (utils/http-request :post (str @base-url endpoint) @api-key params))
 
-(def rootfolder (delay (a/<!! (utils/request-and-process-body GET #(get (first %) "path") "/rootfolder"))))
-
 (defn quality-profiles []
   (utils/request-and-process-body
    GET
    #(map utils/process-profile %)
    "/qualityProfile"))
+
+(defn rootfolders []
+  (utils/request-and-process-body
+   GET
+   utils/process-rootfolders
+   "/rootfolder"))
+
+(defn tags []
+  (utils/request-and-process-body
+   GET
+   utils/process-tags
+   "/tag"))
 
 (defn get-from-tmdb [tmdb-id]
   (utils/request-and-process-body
@@ -40,7 +49,6 @@
 
 (defn request-payload [payload]
   (-> payload
-      (select-keys [:title :tmdb-id :quality-profile-id])
+      (select-keys [:title :tmdb-id :quality-profile-id :root-folder-path])
       (assoc :monitored true
-             :root-folder-path @rootfolder
              :add-options {:search-for-movie true})))

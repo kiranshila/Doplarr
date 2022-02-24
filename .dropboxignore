@@ -1,0 +1,14 @@
+# ----
+# Automatically Generated .dropboxignore file at Sun Jan 30 22:58:11 PST 2022
+# ----
+.DS_Store
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+.nrepl-port
+.cpcache/
+.lsp/
+.clj-kondo/
+target/
+# ----

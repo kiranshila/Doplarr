@@ -17,8 +17,6 @@
 (defn PUT [endpoint & [params]]
   (utils/http-request :put (str @base-url endpoint) @api-key params))
 
-(def rootfolder (delay (a/<!! (utils/request-and-process-body GET #(get (first %) "path") "/rootfolder"))))
-
 (defn quality-profiles []
   (utils/request-and-process-body
    GET
@@ -30,6 +28,12 @@
    GET
    #(map utils/process-profile %)
    "/languageProfile"))
+
+(defn rootfolders []
+  (utils/request-and-process-body
+   GET
+   utils/process-rootfolders
+   "/rootfolder"))
 
 (defn get-from-tvdb [tvdb-id]
   (utils/request-and-process-body
@@ -102,7 +106,6 @@
       (-> payload
           (assoc :monitored true
                  :seasons seasons
-                 :root-folder-path @rootfolder
                  :add-options {:ignore-episodes-with-files true
                                :search-for-missing-episodes true})
           (dissoc :season

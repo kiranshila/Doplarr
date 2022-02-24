@@ -113,7 +113,7 @@
 (defn dropdown-result [interaction]
   (Integer/parseInt (s/select-one [:payload :values 0] interaction)))
 
-(defn request-embed [{:keys [media-type title overview poster season quality-profile language-profile]}]
+(defn request-embed [{:keys [media-type title overview poster season quality-profile language-profile rootfolder tag]}]
   {:title title
    :description overview
    :image {:url poster}
@@ -129,7 +129,10 @@
                 :value language-profile})
              (when season
                {:name "Season"
-                :value (if (= season -1) "All" season)})])})
+                :value (if (= season -1) "All" season)})
+             (when rootfolder
+               {:name "Root Folder"
+                :value rootfolder})])})
 
 (defn request [embed-data uuid]
   {:content (str "Request this " (name (:media-type embed-data)) " ?")
