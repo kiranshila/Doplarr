@@ -118,7 +118,7 @@ Alternatively, use docker-compose:
 
 ```yaml
 doplarr:
-  environment
+  environment:
     - SONARR__URL=http://localhost:8989
     - RADARR__URL=http://localhost:7878
     - SONARR__API=sonarr_api
