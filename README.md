@@ -153,7 +153,7 @@ To skip the build, just download `Doplarr.jar` and `config.edn` from the release
 | `SONARR__LANGUAGE_PROFILE`     | `:sonarr/language-profile`     | String  | N/A           | The name of the language profile to use by default for Sonarr                                                                              |
 | `OVERSEERR__DEFAULT_ID`        | `:overseerr/default-id`        | Integer | N/A           | The Overseerr user id to use by default if there is no associated discord account for the requester                                        |
 | `PARTIAL_SEASONS`              | `:partial-seasons`             | Boolean | `true`        | Sets whether users can request partial seasons.                                                                                            |
-| `LOG_LEVEL`                    | `:log-level`                   | Keyword | `:info`       | The log level for the logging backend. This can be changed for debugging purposes. One of `trace :debug :info :warn :error :fatal :report` |
+| `LOG_LEVEL`                    | `:log-level`                   | Keyword | `:info`       | The log level for the logging backend. This can be changed for debugging purposes. One of `:trace :debug :info :warn :error :fatal :report` |
 
 ### Setting up on Windows
 
