@@ -49,6 +49,16 @@
 (expound/defmsg ::has-backend "config must contain at least one of the following backends: sonarr, radarr, overseerr
 If you have configured one, make sure to check spelling. A valid configuration contains both the api key and url")
 
+(spec/def ::does-not-mix-backends-with-overseer
+  #(and (and (or (:radarr/url %) (:sonarr/url %))
+             (not (:overseer/url %)))
+        (and (not (or (:radarr/url %) (:sonarr/url %)))
+             (:overseer/url %))))
+(expound/defmsg ::does-not-mix-backends-with-overseer "Config can't contain both overseer and radarr or sonarr. If you have overseer set up, you probably don't want the others.")
+
+(spec/def ::has-valid-backend-config (spec/and ::has-backend
+                                               ::does-not-mix-backends-with-overseer))
+
 ; Complete configuration
 (spec/def ::config (spec/and
                     (spec/keys :req [:discord/token]
@@ -63,7 +73,7 @@ If you have configured one, make sure to check spelling. A valid configuration c
                                      :radarr/rootfolder]
                                :opt-un [::partial-seasons
                                         ::log-level])
-                    ::has-backend
+                    ::has-valid-backend-config
                     (matched-keys :sonarr/url :sonarr/api)
                     (matched-keys :radarr/url :radarr/api)
                     (matched-keys :overseerr/url :overseerr/api)))
