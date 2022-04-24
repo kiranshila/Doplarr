@@ -13,10 +13,12 @@
     :sonarr/api
     :sonarr/quality-profile
     :sonarr/language-profile
+    :sonarr/rootfolder
     ; Radarr
     :radarr/url
     :radarr/api
     :radarr/quality-profile
+    :radarr/rootfolder
     ; Overseerr
     :overseerr/url
     :overseerr/api
