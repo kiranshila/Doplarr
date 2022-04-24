@@ -20,12 +20,6 @@
 - Simple configuration, no need to have a whole web frontend just for configuration
 - Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly good combination 😛
 
-### Caveats
-
-I wanted a clean app for the sole purpose of requesting movies/TV shows.
-If you need Ombi support (for managing many people requesting), I suggest you check out Overseerr instead.
-There is only a boolean permission (role gated) for who has access to the bot, nothing fancy.
-
 ### Screenshots
 
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Request.png" width="400">
