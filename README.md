@@ -25,5 +25,9 @@
 ## Screenshots
 
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Request.png" width="400">
-<img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Selection.png" width="400">
+
+<img
+src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Selection.png"
+width="400">
+
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/button.png" width="400">
