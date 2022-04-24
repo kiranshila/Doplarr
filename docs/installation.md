@@ -60,7 +60,7 @@ doplarr:
   image: "ghcr.io/kiranshila/doplarr:latest"
 ```
 
-For all options see the configuration table.
+For all options see the [configuration table](https://kiranshila.github.io/Doplarr/#/configuration?id=optional-settings)
 
 ## JAR File
 
