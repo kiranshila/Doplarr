@@ -135,7 +135,7 @@ Then, as root:
 The most obvious way to run the bare JAR on windows is to setup a batch file
 with something like
 
-```batchfile
+```batch
 @ECHO OFF
 start java -jar Doplarr.jar -Dconfig=config.edn
 ```
