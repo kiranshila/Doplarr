@@ -9,7 +9,9 @@
  ; :partial-seasons false
  ; :sonarr/quality-profile ""
  ; :radarr/quality-profile ""
+ ; :radarr/rootfolder ""
  ; :sonarrr/language-profile ""
+ ; :sonarr/rootfolder ""
  ; :discord/role-id role_id
  ; :discord/max-results 10
  ; :overseerr/default-id 1
