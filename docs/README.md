@@ -20,14 +20,23 @@
 - Simple configuration, no need to have a whole web frontend just for configuration
 - Powered by Clojure and [Discljord](https://github.com/IGJoshua/discljord), a markedly good combination 😛
 
-#### Ready to try? Head to the [docs](https://kiranshila.github.io/Doplarr/)
-
-## Screenshots
+### Screenshots
 
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Request.png" width="400">
-
-<img
-src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Selection.png"
-width="400">
-
+<img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/Selection.png" width="400">
 <img src="https://raw.githubusercontent.com/kiranshila/Doplarr/main/screenshots/button.png" width="400">
+
+### FAQ
+
+#### Will you support Lidarr/Readarr/\*arr
+
+Soon™
+
+#### Do you have a support server?
+
+Yes! [here](https://discord.gg/884mGq2fV6)
+
+#### This is super useful! Can I buy you a beer?
+
+Yes, you're too kind! You can sponsor me on my [Github
+Sponsors](https://github.com/sponsors/kiranshila) page.

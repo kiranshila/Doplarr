@@ -23,10 +23,12 @@
 
 ; Radarr optionals
 (spec/def :radarr/quality-profile string?)
-(spec/def :sonarr/quality-profile string?)
+(spec/def :radarr/rootfolder string?)
 
 ; Sonarr optionals
+(spec/def :sonarr/quality-profile string?)
 (spec/def :sonarr/language-profile string?)
+(spec/def :sonarr/rootfolder string?)
 
 ; Overseerr optionals
 (spec/def :overseerr/default-id pos-int?)
@@ -56,7 +58,9 @@ If you have configured one, make sure to check spelling. A valid configuration c
                                      :radarr/quality-profile
                                      :sonarr/quality-profile
                                      :sonarr/language-profile
-                                     :overseerr/default-id]
+                                     :overseerr/default-id
+                                     :sonarr/rootfolder
+                                     :radarr/rootfolder]
                                :opt-un [::partial-seasons
                                         ::log-level])
                     ::has-backend

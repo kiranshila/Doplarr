@@ -18,10 +18,13 @@
   (a/go
     (let [quality-profiles (a/<! (impl/quality-profiles))
           rootfolders (a/<! (impl/rootfolders))
-          {:keys [radarr/quality-profile]} @state/config
-          default-profile-id (utils/id-from-name quality-profiles quality-profile)]
+          {:keys [radarr/quality-profile radarr/rootfolder]} @state/config
+          default-profile-id (utils/id-from-name quality-profiles quality-profile)
+          default-root-folder (utils/id-from-name rootfolders rootfolder)]
       (when (and quality-profile (nil? default-profile-id))
         (warn "Default quality profile in config doesn't exist in backend, check spelling"))
+      (when (and rootfolder (nil? default-root-folder))
+        (warn "Default root folder in config doesn't exist in backend, check spelling"))
       {:quality-profile-id
        (cond
          default-profile-id             default-profile-id
@@ -29,6 +32,7 @@
          :else quality-profiles)
        :rootfolder-id
        (cond
+         default-root-folder default-root-folder
          (= 1 (count rootfolders)) (:id (first rootfolders))
          :else rootfolders)})))
 
