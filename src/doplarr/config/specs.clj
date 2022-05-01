@@ -17,7 +17,6 @@
 (spec/def :discord/token string?)
 
 ;  --- Optional settings
-(spec/def :discord/role-id pos-int?)
 (spec/def :discord/max-results (spec/int-in 1 26))
 (spec/def :discord/requested-msg-style #{:none :plain :embed})
 
@@ -52,8 +51,7 @@ If you have configured one, make sure to check spelling. A valid configuration c
 ; Complete configuration
 (spec/def ::config (spec/and
                     (spec/keys :req [:discord/token]
-                               :opt [:discord/role-id
-                                     :discord/max-results
+                               :opt [:discord/max-results
                                      :discord/requested-msg-style
                                      :radarr/quality-profile
                                      :sonarr/quality-profile

@@ -10,18 +10,16 @@ The first step in configuration is creating the bot in Discord itself.
 4. Go to OAuth2 and under "OAuth2 URL Generator", enable `applications.commands` and `bot`
 5. Copy the resulting URL and use as the invite link to your server
 
-In the server for which you will use the bot, you have the option to restrict
-the commands to a certain role. For this, you need to create a new role for
-your users (or use an existing one). Then, grab that role id.
+### Permissions
 
-To do this:
+As of Doplarr v3.5.0, we removed the ability to role-gate the bot via our
+configuration file as Discord launched the command permissions system within the client itself.
 
-1. Enable Developer Mode (User Settings -> Advanced -> Developer Mode)
-2. Under your server settings, go to Roles, find the role and "Copy ID"
-
-!> Every user that you wish to have access to the slash commands needs to be assigned this role (even the server owner/admins).
-
-This is optional and by default the bot will be accessible to everyone on the server.
+To access this, after adding the bot to your server, navigate to `Server Settings -> Integrations -> Doplarr (or whatever you named it) -> Manage` and
+from there you can configure the channels for which the bot is active and who
+has access to the bot. This is a lot more powerful than the previous system and
+users of the previous `ROLE_ID`-based approach must update as Discord broke the
+old system.
 
 ## Sonarr/Radarr
 
@@ -42,7 +40,6 @@ web interface to Overseerr if you need more features.
 | Environment Variable (Docker)  | Config File Keyword            | Type    | Default Value | Description                                                                                                                                 |
 | ------------------------------ | ------------------------------ | ------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DISCORD__MAX_RESULTS`         | `:discord/max-results`         | Integer | `25`          | Sets the maximum size of the search results selection                                                                                       |
-| `DISCORD__ROLE_ID`             | `:discord/role-id`             | Long    | N/A           | The discord role id for users of the bot (omitting this lets everyone on the server use the bot)                                            |
 | `DISCORD__REQUESTED_MSG_STYLE` | `:discord/requested-msg-style` | Keyword | `:plain`      | Sets the style of the request alert message. One of `:plain :embed :none`                                                                   |
 | `SONARR__QUALITY_PROFILE`      | `:sonarr/quality-profile`      | String  | N/A           | The name of the quality profile to use by default for Sonarr                                                                                |
 | `RADARR__QUALITY_PROFILE`      | `:radarr/quality-profile`      | String  | N/A           | The name of the quality profile to use by default for Radarr                                                                                |
