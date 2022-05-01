@@ -43,11 +43,8 @@
   (info "Connected to guild")
   (let [media-types (config/available-media @state/config)
         messaging (:messaging @state/discord)
-        bot-id (:bot-id @state/discord)
-        [{command-id :id}] (discord/register-commands media-types bot-id messaging id)]
-    (when (:discord/role-id @state/config)
-      (info "Setting role id. Reminder, even the server owner needs this role.")
-      (discord/set-permission bot-id messaging id command-id))))
+        bot-id (:bot-id @state/discord)]
+    (discord/register-commands media-types bot-id messaging id)))
 
 (defmethod handle-event! :default
   [event-type data]

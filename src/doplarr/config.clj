@@ -25,7 +25,6 @@
     :overseerr/default-id
     ; Discord
     :discord/token
-    :discord/role-id
     :discord/max-results
     :discord/requested-msg-style
     ; Doplarr
