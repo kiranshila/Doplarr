@@ -67,7 +67,8 @@
 
 (defn setup-config! []
   (reset! state/config (config/valid-config (load-env)))
-  (timbre/merge-config! {:min-level [[#{"*"} (:log-level @state/config :info)]]}))
+  (timbre/merge-config! {:min-level [[#{"*"} (:log-level @state/config :info)]]
+                         :output-fn (partial timbre/default-output-fn {:stacktrace-fonts {}})}))
 
 (defn startup! []
   (setup-config!)
