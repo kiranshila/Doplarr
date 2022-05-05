@@ -71,7 +71,7 @@
    :style 1
    :custom_id (str "option-page:" uuid ":" option "-" page)
    :disabled false
-   :label label})
+   :label (apply str (take MAX-CHARACTERS label))})
 
 (defn select-menu-option [index result]
   {:label (apply str (take MAX-CHARACTERS (or (:title result) (:name result))))
