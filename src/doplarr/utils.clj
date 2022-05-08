@@ -27,7 +27,6 @@
        :as :json-string-keys
        :coerce :always
        :async? true
-       :http-client {:redirect-policy :normal}
        :headers {"X-API-Key" key}}
       params)
      put
