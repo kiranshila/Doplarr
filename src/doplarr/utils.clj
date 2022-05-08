@@ -32,6 +32,7 @@
       params)
      put
      put)
+    (a/go (trace "HTTP Response: " (a/<! chan)))
     chan))
 
 (defn from-camel [m]
