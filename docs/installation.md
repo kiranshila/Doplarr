@@ -25,6 +25,10 @@ hosted at `ghcr.io/kiranshila/doplarr:latest`. Several other communities like
 [hotio](https://hotio.dev/) and [lsio](https://www.linuxserver.io/) have
 custom containers to better fit Doplarr into their ecosystem.
 
+The containers provided here are a small wrapper around a lightweight JVM
+instance on Alpine linux and should work on any x86 host. ARM support _may_ be
+provided by external bundlers.
+
 !> The Doplarr team is not responsible for those containers or any Unraid templates they
 provide.
 
