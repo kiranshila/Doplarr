@@ -17,7 +17,7 @@
     (apply merge-with deep-merge maps)))
 
 (defn http-request [method url key & [params]]
-  (let [chan (a/promise-chan)
+  (let [chan (a/chan)
         put (partial a/put! chan)]
     (trace "Performing HTTP request" method url params)
     (hc/request
@@ -31,7 +31,7 @@
       params)
      put
      put)
-    (a/go (trace "HTTP Response: " (a/<! chan)))
+    (a/go (trace "Got response from request " (a/<! chan)))
     chan))
 
 (defn from-camel [m]
