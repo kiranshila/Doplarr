@@ -12,6 +12,7 @@
  ; :radarr/rootfolder ""
  ; :sonarrr/language-profile ""
  ; :sonarr/rootfolder ""
+ ; :sonarr/season-folders true
  ; :discord/max-results 10
  ; :overseerr/default-id 1
  ; :log-level :trace

@@ -4,7 +4,6 @@
    [clojure.string :as str]
    [com.rpl.specter :as s]
    [discljord.messaging :as m]
-   [doplarr.state :as state]
    [doplarr.utils :as utils]
    [fmnoise.flow :as flow :refer [else]]
    [taoensso.timbre :refer [fatal]]))
@@ -72,7 +71,7 @@
    :style 1
    :custom_id (str "option-page:" uuid ":" option "-" page)
    :disabled false
-   :label label})
+   :label (apply str (take MAX-CHARACTERS label))})
 
 (defn select-menu-option [index result]
   {:label (apply str (take MAX-CHARACTERS (or (:title result) (:name result))))
@@ -112,7 +111,7 @@
 (defn dropdown-result [interaction]
   (Integer/parseInt (s/select-one [:payload :values 0] interaction)))
 
-(defn request-embed [{:keys [media-type title overview poster season quality-profile language-profile rootfolder tag]}]
+(defn request-embed [{:keys [media-type title overview poster season quality-profile language-profile rootfolder]}]
   {:title title
    :description overview
    :image {:url poster}

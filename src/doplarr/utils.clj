@@ -18,7 +18,9 @@
 
 (defn http-request [method url key & [params]]
   (let [chan (a/promise-chan)
-        put (partial a/put! chan)]
+        put (fn [v]
+              (trace "HTTP Response " v)
+              (a/put! chan v))]
     (trace "Performing HTTP request" method url params)
     (hc/request
      (deep-merge
@@ -27,7 +29,6 @@
        :as :json-string-keys
        :coerce :always
        :async? true
-       :http-client {:redirect-policy :normal}
        :headers {"X-API-Key" key}}
       params)
      put
