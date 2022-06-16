@@ -26,10 +26,9 @@
                                (hash-map :id ssn :name (str ssn)))))
           {:keys [sonarr/language-profile
                   sonarr/quality-profile
+                  sonarr/season-folders
                   partial-seasons
-                  sonarr/rootfolder
-                  ]} @state/config
-
+                  sonarr/rootfolder]} @state/config
           default-profile-id (utils/id-from-name quality-profiles quality-profile)
           default-language-id (utils/id-from-name language-profiles language-profile)
           default-root-folder (utils/id-from-name rootfolders rootfolder)]
@@ -39,7 +38,8 @@
         (warn "Default language profile in config doesn't exist in backend, check spelling"))
       (when (and rootfolder (nil? default-root-folder))
         (warn "Default root folder in config doesn't exist in backend, check spelling"))
-      {:season (cond
+      {:season-folder (if (nil? season-folders) false season-folders)
+       :season (cond
                  (= 1 (count seasons)) (:id (first seasons))
                  (false? partial-seasons) -1
                  :else (conj seasons {:name "All Seasons" :id -1}))

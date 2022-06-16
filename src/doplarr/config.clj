@@ -14,6 +14,7 @@
     :sonarr/quality-profile
     :sonarr/language-profile
     :sonarr/rootfolder
+    :sonarr/season-folders
     ; Radarr
     :radarr/url
     :radarr/api
