@@ -1,23 +1,23 @@
 {:paths ["src" "resources"]
 
- :deps {org.clojure/clojure {:mvn/version "1.11.0"}
+ :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         io.aviso/pretty {:mvn/version "1.1.1"}
         org.clojure/core.cache {:mvn/version "1.0.225"}
         yogthos/config {:mvn/version "1.2.0"}
         com.rpl/specter {:mvn/version "1.1.4"}
         org.suskalo/discljord {:git/url "https://github.com/kiranshila/discljord"
-                               :git/sha "b6e29d4b8f3e77462016a6b60af01357e1415345"}
+                               :git/sha "b66cdbed645ff052dd5f18361a0a7722a4860304"}
         expound/expound {:mvn/version "0.9.0"}
         org.clojure/core.async {:mvn/version "1.5.648"}
-        cheshire/cheshire {:mvn/version "5.10.2"}
+        cheshire/cheshire {:mvn/version "5.11.0"}
         fmnoise/flow {:mvn/version "4.2.1"}
         hato/hato {:mvn/version "0.8.2"}
         com.taoensso/timbre {:mvn/version "5.2.1"}
-        camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.2"}}
+        camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}}
 
  :jvm-opts ["-Dconfig=config.edn"]
 
  :aliases {:build {:extra-paths ["build"]
                    :deps {io.github.seancorfield/build-clj
-                          {:git/tag "v0.8.0" :git/sha "9bd8b8a"}}
+                          {:git/tag "v0.8.3" :git/sha "7ac1f8d"}}
                    :ns-default build}}}
