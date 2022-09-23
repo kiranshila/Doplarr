@@ -23,13 +23,19 @@ old system.
 
 ## Sonarr/Radarr
 
-All you need here are the API keys from `Settings->General`
+All you need here are the API keys from `Settings->General`.
+For these backends, you need to set the `SONARR__URL` and `SONARR__API`
+environment variables or `:sonarr/url` and `:sonarr/api` config file entries to
+their appropriate values The URLs _must_ contain the leading protocols (i.e.
+`http://` or `https://`).
 
 ## Overseerr
 
 Sonarr/Radarr and Overseerr are mutually exclusive - you only need to configure
 one. If you are using Overseerr, your users must have associated discord IDs, or
-the request will fail.
+the request will fail. For this backend, you will set `OVERSEERR__URL` and
+`OVERSEERR__API`, just like radarr and sonarr. Again, this is set _instead of_
+the values for radarr/sonarr.
 
 As a note, this bot isn't meant to wrap the entirety of what Overseerr can do, just the
 necessary bits for requesting with optional 4K and quota support. Just use the
@@ -38,14 +44,14 @@ web interface to Overseerr if you need more features.
 ## Optional Settings
 
 | Environment Variable (Docker)  | Config File Keyword            | Type    | Default Value | Description                                                                                                                                 |
-|--------------------------------|--------------------------------|---------|---------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------ | ------------------------------ | ------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DISCORD__MAX_RESULTS`         | `:discord/max-results`         | Integer | `25`          | Sets the maximum size of the search results selection                                                                                       |
 | `DISCORD__REQUESTED_MSG_STYLE` | `:discord/requested-msg-style` | Keyword | `:plain`      | Sets the style of the request alert message. One of `:plain :embed :none`                                                                   |
 | `SONARR__QUALITY_PROFILE`      | `:sonarr/quality-profile`      | String  | N/A           | The name of the quality profile to use by default for Sonarr                                                                                |
 | `RADARR__QUALITY_PROFILE`      | `:radarr/quality-profile`      | String  | N/A           | The name of the quality profile to use by default for Radarr                                                                                |
 | `SONARR__ROOTFOLDER`           | `:sonarr/rootfolder`           | String  | N/A           | The root folder to use by default for Sonarr                                                                                                |
 | `RADARR__ROOTFOLDER`           | `:radarr/rootfolder`           | String  | N/A           | The root folder to use by default for Radarr                                                                                                |
-| `SONARR__SEASON_FOLDERS`       | `:sonarr/season-folders`       | Boolean | `false`       | Sets whether you're using season folders in Sonarr                                                                                                                                            |
+| `SONARR__SEASON_FOLDERS`       | `:sonarr/season-folders`       | Boolean | `false`       | Sets whether you're using season folders in Sonarr                                                                                          |
 | `SONARR__LANGUAGE_PROFILE`     | `:sonarr/language-profile`     | String  | N/A           | The name of the language profile to use by default for Sonarr                                                                               |
 | `OVERSEERR__DEFAULT_ID`        | `:overseerr/default-id`        | Integer | N/A           | The Overseerr user id to use by default if there is no associated discord account for the requester                                         |
 | `PARTIAL_SEASONS`              | `:partial-seasons`             | Boolean | `true`        | Sets whether users can request partial seasons.                                                                                             |
