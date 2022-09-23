@@ -86,9 +86,9 @@
 
 (defn available-backends [env]
   (cond-> #{}
+    (:overseerr/url env) (conj :overseerr)
     (:radarr/url env) (conj :radarr)
     (:sonarr/url env) (conj :sonarr)
-    (:overseerr/url env) (conj :overseerr)
     (:readarr/url env) (conj :readarr)
     (:lidarr/url env) (conj :lidarr)))
 
