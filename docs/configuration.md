@@ -56,3 +56,7 @@ web interface to Overseerr if you need more features.
 | `OVERSEERR__DEFAULT_ID`        | `:overseerr/default-id`        | Integer | N/A           | The Overseerr user id to use by default if there is no associated discord account for the requester                                         |
 | `PARTIAL_SEASONS`              | `:partial-seasons`             | Boolean | `true`        | Sets whether users can request partial seasons.                                                                                             |
 | `LOG_LEVEL`                    | `:log-level`                   | Keyword | `:info`       | The log level for the logging backend. This can be changed for debugging purposes. One of `:trace :debug :info :warn :error :fatal :report` |
+
+## Windows
+
+Be carefull when setting path variables on Windows, you need to use `/` instead of `\\` for path separators.
