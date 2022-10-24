@@ -59,4 +59,4 @@ web interface to Overseerr if you need more features.
 
 ## Windows
 
-Be carefull when setting path variables on Windows, you need to use `/` instead of `\\` for path separators.
+Be careful when setting path variables on Windows, you need to use `\\` instead of `\` for path separators.
