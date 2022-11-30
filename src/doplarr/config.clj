@@ -59,7 +59,7 @@
   (let [config (s/select-one
                 [(s/submap valid-keys)
                  (s/transformed [s/MAP-VALS nil?] (constantly s/NONE))
-                 (s/transformed [s/MAP-VALS empty? (constantly s/NONE)])
+                 (s/transformed [s/MAP-VALS #(and (string? %) (empty? %))] (constantly s/NONE))
                  (s/transformed [s/ALL #(= "url" (name (first %)))] #(vector (first %) (trimr* (second %) \/)))]
                 env)]
     (if (spec/valid? ::specs/config config)
