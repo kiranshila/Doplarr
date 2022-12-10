@@ -6,9 +6,9 @@ The first step in configuration is creating the bot in Discord itself.
 
 1. Create a new [Application](https://discord.com/developers/applications) in Discord
 2. Go to the Bot tab and add a new bot
-3. Copy out the token
+3. Copy out the token, this will be used for the DISCORD__TOKEN setting
 4. Go to OAuth2 and under "OAuth2 URL Generator", enable `applications.commands` and `bot`
-5. Copy the resulting URL and use as the invite link to your server
+5. Copy the resulting URL and open it in a web browser to authorise the bot to join your server
 
 ### Permissions
 
