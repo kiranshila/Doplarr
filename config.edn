@@ -1,10 +1,8 @@
-{:sonarr/url ""
- :sonarr/api ""
- :radarr/url ""
- :radarr/api ""
- ; :overseerr/url ""
- ; :overseerr/api ""
- :discord/token ""
+{
+ :overseerr/url "http://192.168.1.200:9002"
+ :overseerr/api "MTcwNDMwMDUwNTE5MjE5ZTQ4YjAxLWE4N2ItNDIxYS04OWVhLTU2ZGJmMmViYjM0MA=="
+ :discord/token "MTIwNDE1MDcyNDI3NTk5NDY1NA.GaK00w.LMWbegi1-5TNJxd3CVCjfvBeEJXT6mKKwtPXC0"
+ :overseerr/default-id 1
  ; -- Optional Settings
  ; :partial-seasons false
  ; :sonarr/quality-profile ""
@@ -14,6 +12,5 @@
  ; :sonarr/rootfolder ""
  ; :sonarr/season-folders true
  ; :discord/max-results 10
- ; :overseerr/default-id 1
- ; :log-level :trace
+ :log-level :trace
  }

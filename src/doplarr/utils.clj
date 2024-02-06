@@ -91,10 +91,8 @@
   [path-or-query]
   (when path-or-query
     (-> path-or-query
-        (str/replace " " "%20")
-        (str/replace
-         #"[^a-zA-Z0-9]"
-         hm/url-encode))))
+        (str/replace #"[^a-zA-Z0-9]" hm/url-encode)
+        (str/replace "+" "%20"))))
 
 (defn media-fn
   "Resolves a function `f` in the backend namespace matching the available backend for a given `media`"
