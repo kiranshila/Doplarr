@@ -8,6 +8,7 @@
    [doplarr.state :as state]
    [fmnoise.flow :as flow :refer [else then]]
    [hato.client :as hc]
+   [hato.middleware :as hm]
    [taoensso.timbre :refer [fatal trace]]
    [clojure.set :as set]))
 
@@ -83,6 +84,17 @@
       (#(if (str/ends-with? % "id")
           (str/trim (subs % 0 (- (count %) 2)))
           (str/trim %)))))
+
+(defn url-encode-illegal-characters
+  "Takes a raw url path or query and url-encodes any illegal characters.
+  Minimizes ambiguity by encoding space to %20."
+  [path-or-query]
+  (when path-or-query
+    (-> path-or-query
+        (str/replace " " "%20")
+        (str/replace
+         #"[^a-zA-Z0-9]"
+         hm/url-encode))))
 
 (defn media-fn
   "Resolves a function `f` in the backend namespace matching the available backend for a given `media`"
