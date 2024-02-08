@@ -10,7 +10,7 @@
     (utils/request-and-process-body
      impl/GET
      (partial impl/process-search-result type)
-     (str "/search?query=" term))))
+     (str "/search?query=" (utils/url-encode-illegal-characters term)))))
 
 ; In Overseerr, the only additional option we'll need is which season,
 ; if the request type is a series
