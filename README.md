@@ -4,8 +4,7 @@
 
 </p>
 <p align="center">
-<img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/kiranshila/doplarr/Main?style=for-the-badge">
-<img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/kiranshila/doplarr?style=for-the-badge">
+<img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/kiranshila/doplarr/main.yml?style=for-the-badge">
 <img alt="Discord" src="https://img.shields.io/discord/890634173751119882?color=ff69b4&label=discord&style=for-the-badge">
 <img alt="Code" src="https://img.shields.io/badge/code-data-blueviolet?style=for-the-badge">
 </p>
