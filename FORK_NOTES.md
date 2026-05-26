@@ -54,8 +54,10 @@ resolve by keeping both blocks.
   POST); and a progress-message edit in `process-event! "request"`
   before the blocking take, which makes long Chaptarr requests feel
   responsive and removes the duplicate-click surface.
-- `docs/configuration.md` — a Chaptarr section and five rows in the
-  Optional Settings table.
+- `README.md` — Chaptarr-specific quickstart and the
+  Chaptarr config-keys table. Discord / Sonarr / Radarr / Overseerr
+  configuration links out to upstream's docs rather than duplicating
+  them.
 
 **Intentionally not modified:**
 

@@ -44,9 +44,9 @@ ghcr.io/elbrielle/doplarrchaptarr:latest   # follows main
 ghcr.io/elbrielle/doplarrchaptarr:v0.2.0   # pinned release
 ```
 
-### 2. Configure environment variables
+### 2. Configure
 
-At minimum:
+Like upstream Doplarr, you can use either environment variables or a `config.edn` file — both forms work the same way. At minimum:
 
 ```
 DISCORD__TOKEN=<your discord bot token>
@@ -54,27 +54,26 @@ CHAPTARR__URL=http://localhost:8789
 CHAPTARR__API=<your chaptarr api key from Settings → General>
 ```
 
-`CHAPTARR__URL` only needs to be reachable from Doplarr's container;
-it can stay on an internal Docker network. Cover images on Discord
-embeds are pulled from public CDNs rather than from Chaptarr, so
-you don't need to expose Chaptarr to the public internet. (Cover
-attachment itself is currently inconsistent; see
-[Known issues](#known-issues).)
+…or the equivalent `:discord/token`, `:chaptarr/url`, `:chaptarr/api` entries in `config.edn`.
 
-Recommended (so requests skip the root-folder and quality-profile dropdowns):
+`CHAPTARR__URL` only needs to be reachable from Doplarr's container; it can stay on an internal Docker network. Cover images on Discord embeds are pulled from public CDNs rather than from Chaptarr, so you don't need to expose Chaptarr publicly. (Cover attachment itself is currently inconsistent; see [Known issues](#known-issues).)
 
-```
-CHAPTARR__EBOOK_ROOTFOLDER=/cw-book-ingest
-CHAPTARR__AUDIOBOOK_ROOTFOLDER=/audiobooks/audiobooks
-CHAPTARR__EBOOK_QUALITY_PROFILE=<your ebook quality profile name, e.g. E-Book>
-CHAPTARR__AUDIOBOOK_QUALITY_PROFILE=<your audiobook quality profile name, e.g. Audiobook>
-CHAPTARR__EBOOK_METADATA_PROFILE=<your ebook metadata profile name, e.g. Ebook Default>
-CHAPTARR__AUDIOBOOK_METADATA_PROFILE=<your audiobook metadata profile name, e.g. Audiobook Default>
-```
+#### Chaptarr config keys
 
-If you also want movie / TV requests through the same bot, add `OVERSEERR__URL` + `OVERSEERR__API` (or `SONARR__*` + `RADARR__*`) alongside the Chaptarr keys. All three backend families can coexist.
+Set these to skip the root-folder and quality-profile dropdowns at request time.
 
-Full config reference: [docs/configuration.md](docs/configuration.md).
+| Environment Variable | Config File Keyword | Type | Default | Description |
+|---|---|---|---|---|
+| `CHAPTARR__EBOOK_ROOTFOLDER` | `:chaptarr/ebook-rootfolder` | String | N/A | Default root folder for `/request book`. Example: `/cw-book-ingest` |
+| `CHAPTARR__AUDIOBOOK_ROOTFOLDER` | `:chaptarr/audiobook-rootfolder` | String | N/A | Default root folder for `/request audiobook`. Example: `/audiobooks/audiobooks` |
+| `CHAPTARR__EBOOK_QUALITY_PROFILE` | `:chaptarr/ebook-quality-profile` | String | N/A | Default quality profile name for ebooks |
+| `CHAPTARR__AUDIOBOOK_QUALITY_PROFILE` | `:chaptarr/audiobook-quality-profile` | String | N/A | Default quality profile name for audiobooks |
+| `CHAPTARR__EBOOK_METADATA_PROFILE` | `:chaptarr/ebook-metadata-profile` | String | N/A | Default metadata profile name for ebooks (Chaptarr stores ebook/audiobook metadata profiles separately, profileType 2 vs 1) |
+| `CHAPTARR__AUDIOBOOK_METADATA_PROFILE` | `:chaptarr/audiobook-metadata-profile` | String | N/A | Default metadata profile name for audiobooks |
+| `CHAPTARR__ENABLE_BOOK` | `:chaptarr/enable-book` | Boolean | `true` | Set to `false` to suppress `/request book` when only audiobook requests should route here |
+| `CHAPTARR__ENABLE_AUDIOBOOK` | `:chaptarr/enable-audiobook` | Boolean | `true` | Set to `false` to suppress `/request audiobook` when only ebook requests should route here |
+
+For Discord, Sonarr, Radarr, Overseerr, and all non-Chaptarr settings, see upstream Doplarr's [configuration page](https://kiranshila.github.io/Doplarr/#/configuration). All three backend families (books, movies/TV, and Overseerr) can coexist — just configure whichever you want.
 
 ### 3. Deploy
 
@@ -95,7 +94,7 @@ The container needs outbound access to Discord and HTTP access to Chaptarr. No v
 
 ### 4. Register the Discord bot
 
-Follow the Discord bot setup section of [docs/configuration.md](docs/configuration.md): create an application, enable `bot` and `applications.commands` scopes, and authorize it to your server. You can reuse an existing Doplarr bot; nothing about the bot registration changes in this fork.
+Follow upstream Doplarr's [Discord setup](https://kiranshila.github.io/Doplarr/#/configuration?id=discord) and [Permissions](https://kiranshila.github.io/Doplarr/#/configuration?id=permissions) sections: create an application, enable `bot` and `applications.commands` scopes, and authorize it to your server. You can reuse an existing Doplarr bot; nothing about the bot registration changes in this fork.
 
 ## Verify
 

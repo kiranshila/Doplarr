@@ -4,6 +4,8 @@
  :radarr/api ""
  ; :overseerr/url ""
  ; :overseerr/api ""
+ ; :chaptarr/url ""
+ ; :chaptarr/api ""
  :discord/token ""
  ; -- Optional Settings
  ; :partial-seasons false
@@ -13,6 +15,14 @@
  ; :sonarrr/language-profile ""
  ; :sonarr/rootfolder ""
  ; :sonarr/season-folders true
+ ; :chaptarr/ebook-rootfolder ""
+ ; :chaptarr/audiobook-rootfolder ""
+ ; :chaptarr/ebook-quality-profile ""
+ ; :chaptarr/audiobook-quality-profile ""
+ ; :chaptarr/ebook-metadata-profile ""
+ ; :chaptarr/audiobook-metadata-profile ""
+ ; :chaptarr/enable-book true
+ ; :chaptarr/enable-audiobook true
  ; :discord/max-results 10
  ; :overseerr/default-id 1
  ; :log-level :trace
