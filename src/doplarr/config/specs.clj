@@ -42,6 +42,8 @@
 (spec/def :chaptarr/audiobook-quality-profile string?)
 (spec/def :chaptarr/ebook-metadata-profile string?)
 (spec/def :chaptarr/audiobook-metadata-profile string?)
+(spec/def :chaptarr/enable-book boolean?)
+(spec/def :chaptarr/enable-audiobook boolean?)
 
 ; Doplarr optionals
 (spec/def ::partial-seasons boolean?)
@@ -76,7 +78,9 @@ If you have configured one, make sure to check spelling. A valid configuration c
                                      :chaptarr/ebook-quality-profile
                                      :chaptarr/audiobook-quality-profile
                                      :chaptarr/ebook-metadata-profile
-                                     :chaptarr/audiobook-metadata-profile]
+                                     :chaptarr/audiobook-metadata-profile
+                                     :chaptarr/enable-book
+                                     :chaptarr/enable-audiobook]
                                :opt-un [::partial-seasons
                                         ::log-level])
                     ::has-backend

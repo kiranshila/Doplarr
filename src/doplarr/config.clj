@@ -33,6 +33,8 @@
     :chaptarr/audiobook-quality-profile
     :chaptarr/ebook-metadata-profile
     :chaptarr/audiobook-metadata-profile
+    :chaptarr/enable-book
+    :chaptarr/enable-audiobook
     ; Discord
     :discord/token
     :discord/max-results
@@ -105,8 +107,16 @@
     (:lidarr/url env) (conj :lidarr)
     (:chaptarr/url env) (conj :chaptarr)))
 
+(defn- backend-media-types [env backend]
+  (let [base (backend-media backend)]
+    (if (= backend :chaptarr)
+      (cond->> base
+        (false? (:chaptarr/enable-book env)) (remove #{:book})
+        (false? (:chaptarr/enable-audiobook env)) (remove #{:audiobook}))
+      base)))
+
 (defn available-media [env]
-  (into #{} (flatten (map backend-media (available-backends env)))))
+  (into #{} (mapcat (partial backend-media-types env) (available-backends env))))
 
 (defn available-backend-for-media [media env]
   (first
