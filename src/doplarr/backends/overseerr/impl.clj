@@ -100,17 +100,21 @@
                      (into [])))
          (else #(fatal % "Exception on querying Overseerr users")))))
 
-(defn discord-id [ovsr-id]
+(defn discord-ids [ovsr-id]
   (a/go
     (->> (a/<! (GET (str "/user/" ovsr-id)))
-         (then #(->> (utils/from-camel %)
-                     (s/select-one [:body :settings :discord-id])))
-         (else #(fatal % "Exception on querying Overseerr discord id")))))
+         (then (fn [result]
+                 (let [settings (s/select-one [:body :settings] (utils/from-camel result))]
+                   (or (seq (:discord-ids settings))
+                       (when-let [id (:discord-id settings)] [id])
+                       []))))
+         (else #(fatal % "Exception on querying Overseerr discord ids")))))
 
 (defn discord-users []
   (a/go-loop [ids (a/<! (all-users))
               users {}]
     (if (empty? ids)
       users
-      (let [id (first ids)]
-        (recur (rest ids) (assoc users (a/<! (discord-id id)) id))))))
+      (let [id (first ids)
+            disc-ids (a/<! (discord-ids id))]
+        (recur (rest ids) (merge users (into {} (map #(vector % id) disc-ids))))))))
